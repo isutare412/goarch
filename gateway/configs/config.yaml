@@ -1,0 +1,3 @@
+logger:
+  format: text # text / json
+  stackTrace: false
