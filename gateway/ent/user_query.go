@@ -20,14 +20,15 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
-	order        []OrderFunc
-	fields       []string
-	predicates   []predicate.User
-	withAdmin    *AdminQuery
-	withMeetings *MeetingQuery
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.User
+	withAdmin     *AdminQuery
+	withOrganizes *MeetingQuery
+	withMeetings  *MeetingQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +80,28 @@ func (uq *UserQuery) QueryAdmin() *AdminQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(admin.Table, admin.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.AdminTable, user.AdminColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOrganizes chains the current query on the "organizes" edge.
+func (uq *UserQuery) QueryOrganizes() *MeetingQuery {
+	query := &MeetingQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(meeting.Table, meeting.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.OrganizesTable, user.OrganizesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -284,13 +307,14 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:       uq.config,
-		limit:        uq.limit,
-		offset:       uq.offset,
-		order:        append([]OrderFunc{}, uq.order...),
-		predicates:   append([]predicate.User{}, uq.predicates...),
-		withAdmin:    uq.withAdmin.Clone(),
-		withMeetings: uq.withMeetings.Clone(),
+		config:        uq.config,
+		limit:         uq.limit,
+		offset:        uq.offset,
+		order:         append([]OrderFunc{}, uq.order...),
+		predicates:    append([]predicate.User{}, uq.predicates...),
+		withAdmin:     uq.withAdmin.Clone(),
+		withOrganizes: uq.withOrganizes.Clone(),
+		withMeetings:  uq.withMeetings.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -306,6 +330,17 @@ func (uq *UserQuery) WithAdmin(opts ...func(*AdminQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withAdmin = query
+	return uq
+}
+
+// WithOrganizes tells the query-builder to eager-load the nodes that are connected to
+// the "organizes" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithOrganizes(opts ...func(*MeetingQuery)) *UserQuery {
+	query := &MeetingQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withOrganizes = query
 	return uq
 }
 
@@ -388,8 +423,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			uq.withAdmin != nil,
+			uq.withOrganizes != nil,
 			uq.withMeetings != nil,
 		}
 	)
@@ -414,6 +450,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if query := uq.withAdmin; query != nil {
 		if err := uq.loadAdmin(ctx, query, nodes, nil,
 			func(n *User, e *Admin) { n.Edges.Admin = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withOrganizes; query != nil {
+		if err := uq.loadOrganizes(ctx, query, nodes,
+			func(n *User) { n.Edges.Organizes = []*Meeting{} },
+			func(n *User, e *Meeting) { n.Edges.Organizes = append(n.Edges.Organizes, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -450,6 +493,37 @@ func (uq *UserQuery) loadAdmin(ctx context.Context, query *AdminQuery, nodes []*
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "user_admin" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadOrganizes(ctx context.Context, query *MeetingQuery, nodes []*User, init func(*User), assign func(*User, *Meeting)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Meeting(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.OrganizesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_organizes
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_organizes" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_organizes" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -73,19 +73,30 @@ func (mu *MeetingUpdate) ClearDescription() *MeetingUpdate {
 	return mu
 }
 
-// AddOrganizerIDs adds the "organizer" edge to the User entity by IDs.
-func (mu *MeetingUpdate) AddOrganizerIDs(ids ...int) *MeetingUpdate {
-	mu.mutation.AddOrganizerIDs(ids...)
+// SetOrganizerID sets the "organizer" edge to the User entity by ID.
+func (mu *MeetingUpdate) SetOrganizerID(id int) *MeetingUpdate {
+	mu.mutation.SetOrganizerID(id)
 	return mu
 }
 
-// AddOrganizer adds the "organizer" edges to the User entity.
-func (mu *MeetingUpdate) AddOrganizer(u ...*User) *MeetingUpdate {
+// SetOrganizer sets the "organizer" edge to the User entity.
+func (mu *MeetingUpdate) SetOrganizer(u *User) *MeetingUpdate {
+	return mu.SetOrganizerID(u.ID)
+}
+
+// AddParticipantIDs adds the "participants" edge to the User entity by IDs.
+func (mu *MeetingUpdate) AddParticipantIDs(ids ...int) *MeetingUpdate {
+	mu.mutation.AddParticipantIDs(ids...)
+	return mu
+}
+
+// AddParticipants adds the "participants" edges to the User entity.
+func (mu *MeetingUpdate) AddParticipants(u ...*User) *MeetingUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return mu.AddOrganizerIDs(ids...)
+	return mu.AddParticipantIDs(ids...)
 }
 
 // Mutation returns the MeetingMutation object of the builder.
@@ -93,25 +104,31 @@ func (mu *MeetingUpdate) Mutation() *MeetingMutation {
 	return mu.mutation
 }
 
-// ClearOrganizer clears all "organizer" edges to the User entity.
+// ClearOrganizer clears the "organizer" edge to the User entity.
 func (mu *MeetingUpdate) ClearOrganizer() *MeetingUpdate {
 	mu.mutation.ClearOrganizer()
 	return mu
 }
 
-// RemoveOrganizerIDs removes the "organizer" edge to User entities by IDs.
-func (mu *MeetingUpdate) RemoveOrganizerIDs(ids ...int) *MeetingUpdate {
-	mu.mutation.RemoveOrganizerIDs(ids...)
+// ClearParticipants clears all "participants" edges to the User entity.
+func (mu *MeetingUpdate) ClearParticipants() *MeetingUpdate {
+	mu.mutation.ClearParticipants()
 	return mu
 }
 
-// RemoveOrganizer removes "organizer" edges to User entities.
-func (mu *MeetingUpdate) RemoveOrganizer(u ...*User) *MeetingUpdate {
+// RemoveParticipantIDs removes the "participants" edge to User entities by IDs.
+func (mu *MeetingUpdate) RemoveParticipantIDs(ids ...int) *MeetingUpdate {
+	mu.mutation.RemoveParticipantIDs(ids...)
+	return mu
+}
+
+// RemoveParticipants removes "participants" edges to User entities.
+func (mu *MeetingUpdate) RemoveParticipants(u ...*User) *MeetingUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return mu.RemoveOrganizerIDs(ids...)
+	return mu.RemoveParticipantIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -190,6 +207,9 @@ func (mu *MeetingUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Meeting.title": %w`, err)}
 		}
 	}
+	if _, ok := mu.mutation.OrganizerID(); mu.mutation.OrganizerCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Meeting.organizer"`)
+	}
 	return nil
 }
 
@@ -254,10 +274,10 @@ func (mu *MeetingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.OrganizerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   meeting.OrganizerTable,
-			Columns: meeting.OrganizerPrimaryKey,
+			Columns: []string{meeting.OrganizerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -268,12 +288,47 @@ func (mu *MeetingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.RemovedOrganizerIDs(); len(nodes) > 0 && !mu.mutation.OrganizerCleared() {
+	if nodes := mu.mutation.OrganizerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   meeting.OrganizerTable,
+			Columns: []string{meeting.OrganizerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.ParticipantsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   meeting.OrganizerTable,
-			Columns: meeting.OrganizerPrimaryKey,
+			Table:   meeting.ParticipantsTable,
+			Columns: meeting.ParticipantsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.RemovedParticipantsIDs(); len(nodes) > 0 && !mu.mutation.ParticipantsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   meeting.ParticipantsTable,
+			Columns: meeting.ParticipantsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -287,12 +342,12 @@ func (mu *MeetingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.OrganizerIDs(); len(nodes) > 0 {
+	if nodes := mu.mutation.ParticipantsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   meeting.OrganizerTable,
-			Columns: meeting.OrganizerPrimaryKey,
+			Table:   meeting.ParticipantsTable,
+			Columns: meeting.ParticipantsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -369,19 +424,30 @@ func (muo *MeetingUpdateOne) ClearDescription() *MeetingUpdateOne {
 	return muo
 }
 
-// AddOrganizerIDs adds the "organizer" edge to the User entity by IDs.
-func (muo *MeetingUpdateOne) AddOrganizerIDs(ids ...int) *MeetingUpdateOne {
-	muo.mutation.AddOrganizerIDs(ids...)
+// SetOrganizerID sets the "organizer" edge to the User entity by ID.
+func (muo *MeetingUpdateOne) SetOrganizerID(id int) *MeetingUpdateOne {
+	muo.mutation.SetOrganizerID(id)
 	return muo
 }
 
-// AddOrganizer adds the "organizer" edges to the User entity.
-func (muo *MeetingUpdateOne) AddOrganizer(u ...*User) *MeetingUpdateOne {
+// SetOrganizer sets the "organizer" edge to the User entity.
+func (muo *MeetingUpdateOne) SetOrganizer(u *User) *MeetingUpdateOne {
+	return muo.SetOrganizerID(u.ID)
+}
+
+// AddParticipantIDs adds the "participants" edge to the User entity by IDs.
+func (muo *MeetingUpdateOne) AddParticipantIDs(ids ...int) *MeetingUpdateOne {
+	muo.mutation.AddParticipantIDs(ids...)
+	return muo
+}
+
+// AddParticipants adds the "participants" edges to the User entity.
+func (muo *MeetingUpdateOne) AddParticipants(u ...*User) *MeetingUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return muo.AddOrganizerIDs(ids...)
+	return muo.AddParticipantIDs(ids...)
 }
 
 // Mutation returns the MeetingMutation object of the builder.
@@ -389,25 +455,31 @@ func (muo *MeetingUpdateOne) Mutation() *MeetingMutation {
 	return muo.mutation
 }
 
-// ClearOrganizer clears all "organizer" edges to the User entity.
+// ClearOrganizer clears the "organizer" edge to the User entity.
 func (muo *MeetingUpdateOne) ClearOrganizer() *MeetingUpdateOne {
 	muo.mutation.ClearOrganizer()
 	return muo
 }
 
-// RemoveOrganizerIDs removes the "organizer" edge to User entities by IDs.
-func (muo *MeetingUpdateOne) RemoveOrganizerIDs(ids ...int) *MeetingUpdateOne {
-	muo.mutation.RemoveOrganizerIDs(ids...)
+// ClearParticipants clears all "participants" edges to the User entity.
+func (muo *MeetingUpdateOne) ClearParticipants() *MeetingUpdateOne {
+	muo.mutation.ClearParticipants()
 	return muo
 }
 
-// RemoveOrganizer removes "organizer" edges to User entities.
-func (muo *MeetingUpdateOne) RemoveOrganizer(u ...*User) *MeetingUpdateOne {
+// RemoveParticipantIDs removes the "participants" edge to User entities by IDs.
+func (muo *MeetingUpdateOne) RemoveParticipantIDs(ids ...int) *MeetingUpdateOne {
+	muo.mutation.RemoveParticipantIDs(ids...)
+	return muo
+}
+
+// RemoveParticipants removes "participants" edges to User entities.
+func (muo *MeetingUpdateOne) RemoveParticipants(u ...*User) *MeetingUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return muo.RemoveOrganizerIDs(ids...)
+	return muo.RemoveParticipantIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -499,6 +571,9 @@ func (muo *MeetingUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Meeting.title": %w`, err)}
 		}
 	}
+	if _, ok := muo.mutation.OrganizerID(); muo.mutation.OrganizerCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Meeting.organizer"`)
+	}
 	return nil
 }
 
@@ -580,10 +655,10 @@ func (muo *MeetingUpdateOne) sqlSave(ctx context.Context) (_node *Meeting, err e
 	}
 	if muo.mutation.OrganizerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   meeting.OrganizerTable,
-			Columns: meeting.OrganizerPrimaryKey,
+			Columns: []string{meeting.OrganizerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -594,12 +669,47 @@ func (muo *MeetingUpdateOne) sqlSave(ctx context.Context) (_node *Meeting, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.RemovedOrganizerIDs(); len(nodes) > 0 && !muo.mutation.OrganizerCleared() {
+	if nodes := muo.mutation.OrganizerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   meeting.OrganizerTable,
+			Columns: []string{meeting.OrganizerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.ParticipantsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   meeting.OrganizerTable,
-			Columns: meeting.OrganizerPrimaryKey,
+			Table:   meeting.ParticipantsTable,
+			Columns: meeting.ParticipantsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.RemovedParticipantsIDs(); len(nodes) > 0 && !muo.mutation.ParticipantsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   meeting.ParticipantsTable,
+			Columns: meeting.ParticipantsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -613,12 +723,12 @@ func (muo *MeetingUpdateOne) sqlSave(ctx context.Context) (_node *Meeting, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.OrganizerIDs(); len(nodes) > 0 {
+	if nodes := muo.mutation.ParticipantsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   meeting.OrganizerTable,
-			Columns: meeting.OrganizerPrimaryKey,
+			Table:   meeting.ParticipantsTable,
+			Columns: meeting.ParticipantsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

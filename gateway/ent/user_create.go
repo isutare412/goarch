@@ -89,6 +89,21 @@ func (uc *UserCreate) SetAdmin(a *Admin) *UserCreate {
 	return uc.SetAdminID(a.ID)
 }
 
+// AddOrganizeIDs adds the "organizes" edge to the Meeting entity by IDs.
+func (uc *UserCreate) AddOrganizeIDs(ids ...int) *UserCreate {
+	uc.mutation.AddOrganizeIDs(ids...)
+	return uc
+}
+
+// AddOrganizes adds the "organizes" edges to the Meeting entity.
+func (uc *UserCreate) AddOrganizes(m ...*Meeting) *UserCreate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uc.AddOrganizeIDs(ids...)
+}
+
 // AddMeetingIDs adds the "meetings" edge to the Meeting entity by IDs.
 func (uc *UserCreate) AddMeetingIDs(ids ...int) *UserCreate {
 	uc.mutation.AddMeetingIDs(ids...)
@@ -282,6 +297,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: admin.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.OrganizesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OrganizesTable,
+			Columns: []string{user.OrganizesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: meeting.FieldID,
 				},
 			},
 		}

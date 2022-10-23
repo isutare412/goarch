@@ -26,7 +26,7 @@ var (
 				Symbol:     "admins_users_admin",
 				Columns:    []*schema.Column{AdminsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -39,12 +39,21 @@ var (
 		{Name: "starts_at", Type: field.TypeTime},
 		{Name: "ends_at", Type: field.TypeTime},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "user_organizes", Type: field.TypeInt},
 	}
 	// MeetingsTable holds the schema information for the "meetings" table.
 	MeetingsTable = &schema.Table{
 		Name:       "meetings",
 		Columns:    MeetingsColumns,
 		PrimaryKey: []*schema.Column{MeetingsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "meetings_users_organizes",
+				Columns:    []*schema.Column{MeetingsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -96,6 +105,7 @@ var (
 
 func init() {
 	AdminsTable.ForeignKeys[0].RefTable = UsersTable
+	MeetingsTable.ForeignKeys[0].RefTable = UsersTable
 	UserMeetingsTable.ForeignKeys[0].RefTable = UsersTable
 	UserMeetingsTable.ForeignKeys[1].RefTable = MeetingsTable
 }

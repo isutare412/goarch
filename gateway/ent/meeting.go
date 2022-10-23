@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/isutare412/goarch/gateway/ent/meeting"
+	"github.com/isutare412/goarch/gateway/ent/user"
 )
 
 // Meeting is the model entity for the Meeting schema.
@@ -30,25 +31,41 @@ type Meeting struct {
 	Description *string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MeetingQuery when eager-loading is set.
-	Edges MeetingEdges `json:"edges"`
+	Edges          MeetingEdges `json:"edges"`
+	user_organizes *int
 }
 
 // MeetingEdges holds the relations/edges for other nodes in the graph.
 type MeetingEdges struct {
 	// Organizer holds the value of the organizer edge.
-	Organizer []*User `json:"organizer,omitempty"`
+	Organizer *User `json:"organizer,omitempty"`
+	// Participants holds the value of the participants edge.
+	Participants []*User `json:"participants,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // OrganizerOrErr returns the Organizer value or an error if the edge
-// was not loaded in eager-loading.
-func (e MeetingEdges) OrganizerOrErr() ([]*User, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MeetingEdges) OrganizerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
+		if e.Organizer == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
 		return e.Organizer, nil
 	}
 	return nil, &NotLoadedError{edge: "organizer"}
+}
+
+// ParticipantsOrErr returns the Participants value or an error if the edge
+// was not loaded in eager-loading.
+func (e MeetingEdges) ParticipantsOrErr() ([]*User, error) {
+	if e.loadedTypes[1] {
+		return e.Participants, nil
+	}
+	return nil, &NotLoadedError{edge: "participants"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -62,6 +79,8 @@ func (*Meeting) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case meeting.FieldCreateTime, meeting.FieldUpdateTime, meeting.FieldStartsAt, meeting.FieldEndsAt:
 			values[i] = new(sql.NullTime)
+		case meeting.ForeignKeys[0]: // user_organizes
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Meeting", columns[i])
 		}
@@ -120,6 +139,13 @@ func (m *Meeting) assignValues(columns []string, values []any) error {
 				m.Description = new(string)
 				*m.Description = value.String
 			}
+		case meeting.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_organizes", value)
+			} else if value.Valid {
+				m.user_organizes = new(int)
+				*m.user_organizes = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -128,6 +154,11 @@ func (m *Meeting) assignValues(columns []string, values []any) error {
 // QueryOrganizer queries the "organizer" edge of the Meeting entity.
 func (m *Meeting) QueryOrganizer() *UserQuery {
 	return (&MeetingClient{config: m.config}).QueryOrganizer(m)
+}
+
+// QueryParticipants queries the "participants" edge of the Meeting entity.
+func (m *Meeting) QueryParticipants() *UserQuery {
+	return (&MeetingClient{config: m.config}).QueryParticipants(m)
 }
 
 // Update returns a builder for updating this Meeting.

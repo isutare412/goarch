@@ -21,6 +21,8 @@ const (
 	FieldEmail = "email"
 	// EdgeAdmin holds the string denoting the admin edge name in mutations.
 	EdgeAdmin = "admin"
+	// EdgeOrganizes holds the string denoting the organizes edge name in mutations.
+	EdgeOrganizes = "organizes"
 	// EdgeMeetings holds the string denoting the meetings edge name in mutations.
 	EdgeMeetings = "meetings"
 	// Table holds the table name of the user in the database.
@@ -32,6 +34,13 @@ const (
 	AdminInverseTable = "admins"
 	// AdminColumn is the table column denoting the admin relation/edge.
 	AdminColumn = "user_admin"
+	// OrganizesTable is the table that holds the organizes relation/edge.
+	OrganizesTable = "meetings"
+	// OrganizesInverseTable is the table name for the Meeting entity.
+	// It exists in this package in order to avoid circular dependency with the "meeting" package.
+	OrganizesInverseTable = "meetings"
+	// OrganizesColumn is the table column denoting the organizes relation/edge.
+	OrganizesColumn = "user_organizes"
 	// MeetingsTable is the table that holds the meetings relation/edge. The primary key declared below.
 	MeetingsTable = "user_meetings"
 	// MeetingsInverseTable is the table name for the Meeting entity.

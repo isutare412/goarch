@@ -597,7 +597,7 @@ func HasOrganizer() predicate.Meeting {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(OrganizerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, OrganizerTable, OrganizerPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, OrganizerTable, OrganizerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -609,7 +609,35 @@ func HasOrganizerWith(preds ...predicate.User) predicate.Meeting {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(OrganizerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, OrganizerTable, OrganizerPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, OrganizerTable, OrganizerColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasParticipants applies the HasEdge predicate on the "participants" edge.
+func HasParticipants() predicate.Meeting {
+	return predicate.Meeting(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ParticipantsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, ParticipantsTable, ParticipantsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasParticipantsWith applies the HasEdge predicate on the "participants" edge with a given conditions (other predicates).
+func HasParticipantsWith(preds ...predicate.User) predicate.Meeting {
+	return predicate.Meeting(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ParticipantsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, ParticipantsTable, ParticipantsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

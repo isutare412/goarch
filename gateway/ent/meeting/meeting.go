@@ -25,13 +25,22 @@ const (
 	FieldDescription = "description"
 	// EdgeOrganizer holds the string denoting the organizer edge name in mutations.
 	EdgeOrganizer = "organizer"
+	// EdgeParticipants holds the string denoting the participants edge name in mutations.
+	EdgeParticipants = "participants"
 	// Table holds the table name of the meeting in the database.
 	Table = "meetings"
-	// OrganizerTable is the table that holds the organizer relation/edge. The primary key declared below.
-	OrganizerTable = "user_meetings"
+	// OrganizerTable is the table that holds the organizer relation/edge.
+	OrganizerTable = "meetings"
 	// OrganizerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OrganizerInverseTable = "users"
+	// OrganizerColumn is the table column denoting the organizer relation/edge.
+	OrganizerColumn = "user_organizes"
+	// ParticipantsTable is the table that holds the participants relation/edge. The primary key declared below.
+	ParticipantsTable = "user_meetings"
+	// ParticipantsInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	ParticipantsInverseTable = "users"
 )
 
 // Columns holds all SQL columns for meeting fields.
@@ -45,16 +54,27 @@ var Columns = []string{
 	FieldDescription,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "meetings"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"user_organizes",
+}
+
 var (
-	// OrganizerPrimaryKey and OrganizerColumn2 are the table columns denoting the
-	// primary key for the organizer relation (M2M).
-	OrganizerPrimaryKey = []string{"user_id", "meeting_id"}
+	// ParticipantsPrimaryKey and ParticipantsColumn2 are the table columns denoting the
+	// primary key for the participants relation (M2M).
+	ParticipantsPrimaryKey = []string{"user_id", "meeting_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

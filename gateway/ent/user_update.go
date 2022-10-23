@@ -81,6 +81,21 @@ func (uu *UserUpdate) SetAdmin(a *Admin) *UserUpdate {
 	return uu.SetAdminID(a.ID)
 }
 
+// AddOrganizeIDs adds the "organizes" edge to the Meeting entity by IDs.
+func (uu *UserUpdate) AddOrganizeIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddOrganizeIDs(ids...)
+	return uu
+}
+
+// AddOrganizes adds the "organizes" edges to the Meeting entity.
+func (uu *UserUpdate) AddOrganizes(m ...*Meeting) *UserUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.AddOrganizeIDs(ids...)
+}
+
 // AddMeetingIDs adds the "meetings" edge to the Meeting entity by IDs.
 func (uu *UserUpdate) AddMeetingIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddMeetingIDs(ids...)
@@ -105,6 +120,27 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 func (uu *UserUpdate) ClearAdmin() *UserUpdate {
 	uu.mutation.ClearAdmin()
 	return uu
+}
+
+// ClearOrganizes clears all "organizes" edges to the Meeting entity.
+func (uu *UserUpdate) ClearOrganizes() *UserUpdate {
+	uu.mutation.ClearOrganizes()
+	return uu
+}
+
+// RemoveOrganizeIDs removes the "organizes" edge to Meeting entities by IDs.
+func (uu *UserUpdate) RemoveOrganizeIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveOrganizeIDs(ids...)
+	return uu
+}
+
+// RemoveOrganizes removes "organizes" edges to Meeting entities.
+func (uu *UserUpdate) RemoveOrganizes(m ...*Meeting) *UserUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.RemoveOrganizeIDs(ids...)
 }
 
 // ClearMeetings clears all "meetings" edges to the Meeting entity.
@@ -292,6 +328,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.OrganizesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OrganizesTable,
+			Columns: []string{user.OrganizesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: meeting.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedOrganizesIDs(); len(nodes) > 0 && !uu.mutation.OrganizesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OrganizesTable,
+			Columns: []string{user.OrganizesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: meeting.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.OrganizesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OrganizesTable,
+			Columns: []string{user.OrganizesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: meeting.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if uu.mutation.MeetingsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -416,6 +506,21 @@ func (uuo *UserUpdateOne) SetAdmin(a *Admin) *UserUpdateOne {
 	return uuo.SetAdminID(a.ID)
 }
 
+// AddOrganizeIDs adds the "organizes" edge to the Meeting entity by IDs.
+func (uuo *UserUpdateOne) AddOrganizeIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddOrganizeIDs(ids...)
+	return uuo
+}
+
+// AddOrganizes adds the "organizes" edges to the Meeting entity.
+func (uuo *UserUpdateOne) AddOrganizes(m ...*Meeting) *UserUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.AddOrganizeIDs(ids...)
+}
+
 // AddMeetingIDs adds the "meetings" edge to the Meeting entity by IDs.
 func (uuo *UserUpdateOne) AddMeetingIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddMeetingIDs(ids...)
@@ -440,6 +545,27 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 func (uuo *UserUpdateOne) ClearAdmin() *UserUpdateOne {
 	uuo.mutation.ClearAdmin()
 	return uuo
+}
+
+// ClearOrganizes clears all "organizes" edges to the Meeting entity.
+func (uuo *UserUpdateOne) ClearOrganizes() *UserUpdateOne {
+	uuo.mutation.ClearOrganizes()
+	return uuo
+}
+
+// RemoveOrganizeIDs removes the "organizes" edge to Meeting entities by IDs.
+func (uuo *UserUpdateOne) RemoveOrganizeIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveOrganizeIDs(ids...)
+	return uuo
+}
+
+// RemoveOrganizes removes "organizes" edges to Meeting entities.
+func (uuo *UserUpdateOne) RemoveOrganizes(m ...*Meeting) *UserUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.RemoveOrganizeIDs(ids...)
 }
 
 // ClearMeetings clears all "meetings" edges to the Meeting entity.
@@ -649,6 +775,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: admin.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.OrganizesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OrganizesTable,
+			Columns: []string{user.OrganizesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: meeting.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedOrganizesIDs(); len(nodes) > 0 && !uuo.mutation.OrganizesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OrganizesTable,
+			Columns: []string{user.OrganizesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: meeting.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.OrganizesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OrganizesTable,
+			Columns: []string{user.OrganizesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: meeting.FieldID,
 				},
 			},
 		}

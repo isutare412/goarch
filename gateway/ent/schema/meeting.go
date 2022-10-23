@@ -36,7 +36,10 @@ func (Meeting) Mixin() []ent.Mixin {
 func (Meeting) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("organizer", User.Type).
-			Ref("meetings").
-			Required(),
+			Ref("organizes").
+			Required().
+			Unique(),
+		edge.From("participants", User.Type).
+			Ref("meetings"),
 	}
 }

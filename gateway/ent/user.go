@@ -34,11 +34,13 @@ type User struct {
 type UserEdges struct {
 	// Admin holds the value of the admin edge.
 	Admin *Admin `json:"admin,omitempty"`
+	// Organizes holds the value of the organizes edge.
+	Organizes []*Meeting `json:"organizes,omitempty"`
 	// Meetings holds the value of the meetings edge.
 	Meetings []*Meeting `json:"meetings,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // AdminOrErr returns the Admin value or an error if the edge
@@ -54,10 +56,19 @@ func (e UserEdges) AdminOrErr() (*Admin, error) {
 	return nil, &NotLoadedError{edge: "admin"}
 }
 
+// OrganizesOrErr returns the Organizes value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) OrganizesOrErr() ([]*Meeting, error) {
+	if e.loadedTypes[1] {
+		return e.Organizes, nil
+	}
+	return nil, &NotLoadedError{edge: "organizes"}
+}
+
 // MeetingsOrErr returns the Meetings value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) MeetingsOrErr() ([]*Meeting, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Meetings, nil
 	}
 	return nil, &NotLoadedError{edge: "meetings"}
@@ -128,6 +139,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 // QueryAdmin queries the "admin" edge of the User entity.
 func (u *User) QueryAdmin() *AdminQuery {
 	return (&UserClient{config: u.config}).QueryAdmin(u)
+}
+
+// QueryOrganizes queries the "organizes" edge of the User entity.
+func (u *User) QueryOrganizes() *MeetingQuery {
+	return (&UserClient{config: u.config}).QueryOrganizes(u)
 }
 
 // QueryMeetings queries the "meetings" edge of the User entity.

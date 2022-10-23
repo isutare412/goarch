@@ -19,13 +19,15 @@ import (
 // MeetingQuery is the builder for querying Meeting entities.
 type MeetingQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
-	order         []OrderFunc
-	fields        []string
-	predicates    []predicate.Meeting
-	withOrganizer *UserQuery
+	limit            *int
+	offset           *int
+	unique           *bool
+	order            []OrderFunc
+	fields           []string
+	predicates       []predicate.Meeting
+	withOrganizer    *UserQuery
+	withParticipants *UserQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,7 +78,29 @@ func (mq *MeetingQuery) QueryOrganizer() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(meeting.Table, meeting.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, meeting.OrganizerTable, meeting.OrganizerPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, meeting.OrganizerTable, meeting.OrganizerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryParticipants chains the current query on the "participants" edge.
+func (mq *MeetingQuery) QueryParticipants() *UserQuery {
+	query := &UserQuery{config: mq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := mq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := mq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(meeting.Table, meeting.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, meeting.ParticipantsTable, meeting.ParticipantsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -260,12 +284,13 @@ func (mq *MeetingQuery) Clone() *MeetingQuery {
 		return nil
 	}
 	return &MeetingQuery{
-		config:        mq.config,
-		limit:         mq.limit,
-		offset:        mq.offset,
-		order:         append([]OrderFunc{}, mq.order...),
-		predicates:    append([]predicate.Meeting{}, mq.predicates...),
-		withOrganizer: mq.withOrganizer.Clone(),
+		config:           mq.config,
+		limit:            mq.limit,
+		offset:           mq.offset,
+		order:            append([]OrderFunc{}, mq.order...),
+		predicates:       append([]predicate.Meeting{}, mq.predicates...),
+		withOrganizer:    mq.withOrganizer.Clone(),
+		withParticipants: mq.withParticipants.Clone(),
 		// clone intermediate query.
 		sql:    mq.sql.Clone(),
 		path:   mq.path,
@@ -281,6 +306,17 @@ func (mq *MeetingQuery) WithOrganizer(opts ...func(*UserQuery)) *MeetingQuery {
 		opt(query)
 	}
 	mq.withOrganizer = query
+	return mq
+}
+
+// WithParticipants tells the query-builder to eager-load the nodes that are connected to
+// the "participants" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MeetingQuery) WithParticipants(opts ...func(*UserQuery)) *MeetingQuery {
+	query := &UserQuery{config: mq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	mq.withParticipants = query
 	return mq
 }
 
@@ -351,11 +387,19 @@ func (mq *MeetingQuery) prepareQuery(ctx context.Context) error {
 func (mq *MeetingQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Meeting, error) {
 	var (
 		nodes       = []*Meeting{}
+		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			mq.withOrganizer != nil,
+			mq.withParticipants != nil,
 		}
 	)
+	if mq.withOrganizer != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, meeting.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Meeting).scanValues(nil, columns)
 	}
@@ -375,9 +419,15 @@ func (mq *MeetingQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Meet
 		return nodes, nil
 	}
 	if query := mq.withOrganizer; query != nil {
-		if err := mq.loadOrganizer(ctx, query, nodes,
-			func(n *Meeting) { n.Edges.Organizer = []*User{} },
-			func(n *Meeting, e *User) { n.Edges.Organizer = append(n.Edges.Organizer, e) }); err != nil {
+		if err := mq.loadOrganizer(ctx, query, nodes, nil,
+			func(n *Meeting, e *User) { n.Edges.Organizer = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := mq.withParticipants; query != nil {
+		if err := mq.loadParticipants(ctx, query, nodes,
+			func(n *Meeting) { n.Edges.Participants = []*User{} },
+			func(n *Meeting, e *User) { n.Edges.Participants = append(n.Edges.Participants, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -385,6 +435,35 @@ func (mq *MeetingQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Meet
 }
 
 func (mq *MeetingQuery) loadOrganizer(ctx context.Context, query *UserQuery, nodes []*Meeting, init func(*Meeting), assign func(*Meeting, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Meeting)
+	for i := range nodes {
+		if nodes[i].user_organizes == nil {
+			continue
+		}
+		fk := *nodes[i].user_organizes
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_organizes" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (mq *MeetingQuery) loadParticipants(ctx context.Context, query *UserQuery, nodes []*Meeting, init func(*Meeting), assign func(*Meeting, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Meeting)
 	nids := make(map[int]map[*Meeting]struct{})
@@ -396,11 +475,11 @@ func (mq *MeetingQuery) loadOrganizer(ctx context.Context, query *UserQuery, nod
 		}
 	}
 	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(meeting.OrganizerTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(meeting.OrganizerPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(meeting.OrganizerPrimaryKey[1]), edgeIDs...))
+		joinT := sql.Table(meeting.ParticipantsTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(meeting.ParticipantsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(meeting.ParticipantsPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(meeting.OrganizerPrimaryKey[1]))
+		s.Select(joinT.C(meeting.ParticipantsPrimaryKey[1]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
@@ -434,7 +513,7 @@ func (mq *MeetingQuery) loadOrganizer(ctx context.Context, query *UserQuery, nod
 	for _, n := range neighbors {
 		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "organizer" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "participants" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)

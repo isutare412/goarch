@@ -81,19 +81,30 @@ func (mc *MeetingCreate) SetNillableDescription(s *string) *MeetingCreate {
 	return mc
 }
 
-// AddOrganizerIDs adds the "organizer" edge to the User entity by IDs.
-func (mc *MeetingCreate) AddOrganizerIDs(ids ...int) *MeetingCreate {
-	mc.mutation.AddOrganizerIDs(ids...)
+// SetOrganizerID sets the "organizer" edge to the User entity by ID.
+func (mc *MeetingCreate) SetOrganizerID(id int) *MeetingCreate {
+	mc.mutation.SetOrganizerID(id)
 	return mc
 }
 
-// AddOrganizer adds the "organizer" edges to the User entity.
-func (mc *MeetingCreate) AddOrganizer(u ...*User) *MeetingCreate {
+// SetOrganizer sets the "organizer" edge to the User entity.
+func (mc *MeetingCreate) SetOrganizer(u *User) *MeetingCreate {
+	return mc.SetOrganizerID(u.ID)
+}
+
+// AddParticipantIDs adds the "participants" edge to the User entity by IDs.
+func (mc *MeetingCreate) AddParticipantIDs(ids ...int) *MeetingCreate {
+	mc.mutation.AddParticipantIDs(ids...)
+	return mc
+}
+
+// AddParticipants adds the "participants" edges to the User entity.
+func (mc *MeetingCreate) AddParticipants(u ...*User) *MeetingCreate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return mc.AddOrganizerIDs(ids...)
+	return mc.AddParticipantIDs(ids...)
 }
 
 // Mutation returns the MeetingMutation object of the builder.
@@ -205,7 +216,7 @@ func (mc *MeetingCreate) check() error {
 	if _, ok := mc.mutation.EndsAt(); !ok {
 		return &ValidationError{Name: "ends_at", err: errors.New(`ent: missing required field "Meeting.ends_at"`)}
 	}
-	if len(mc.mutation.OrganizerIDs()) == 0 {
+	if _, ok := mc.mutation.OrganizerID(); !ok {
 		return &ValidationError{Name: "organizer", err: errors.New(`ent: missing required edge "Meeting.organizer"`)}
 	}
 	return nil
@@ -285,10 +296,30 @@ func (mc *MeetingCreate) createSpec() (*Meeting, *sqlgraph.CreateSpec) {
 	}
 	if nodes := mc.mutation.OrganizerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   meeting.OrganizerTable,
-			Columns: meeting.OrganizerPrimaryKey,
+			Columns: []string{meeting.OrganizerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_organizes = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.ParticipantsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   meeting.ParticipantsTable,
+			Columns: meeting.ParticipantsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

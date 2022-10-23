@@ -336,7 +336,23 @@ func (c *MeetingClient) QueryOrganizer(m *Meeting) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(meeting.Table, meeting.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, meeting.OrganizerTable, meeting.OrganizerPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, meeting.OrganizerTable, meeting.OrganizerColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParticipants queries the participants edge of a Meeting.
+func (c *MeetingClient) QueryParticipants(m *Meeting) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(meeting.Table, meeting.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, meeting.ParticipantsTable, meeting.ParticipantsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -443,6 +459,22 @@ func (c *UserClient) QueryAdmin(u *User) *AdminQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(admin.Table, admin.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.AdminTable, user.AdminColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOrganizes queries the organizes edge of a User.
+func (c *UserClient) QueryOrganizes(u *User) *MeetingQuery {
+	query := &MeetingQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(meeting.Table, meeting.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.OrganizesTable, user.OrganizesColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
