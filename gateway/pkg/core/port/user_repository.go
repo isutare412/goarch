@@ -7,6 +7,7 @@ import (
 )
 
 type UserRepository interface {
-	Create(context.Context, *ent.User) error
+	Save(context.Context, *ent.User) (*ent.User, error)
+	FindByNickname(context.Context, string) (*ent.User, error)
 	ExistsByNickname(context.Context, string) (bool, error)
 }
