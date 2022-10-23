@@ -164,6 +164,11 @@ func (ac *AdminCreate) check() error {
 	if _, ok := ac.mutation.PhoneNumber(); !ok {
 		return &ValidationError{Name: "phone_number", err: errors.New(`ent: missing required field "Admin.phone_number"`)}
 	}
+	if v, ok := ac.mutation.PhoneNumber(); ok {
+		if err := admin.PhoneNumberValidator(v); err != nil {
+			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "Admin.phone_number": %w`, err)}
+		}
+	}
 	if _, ok := ac.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Admin.user"`)}
 	}

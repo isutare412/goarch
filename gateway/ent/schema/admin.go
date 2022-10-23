@@ -15,7 +15,8 @@ type Admin struct {
 // Fields of the Admin.
 func (Admin) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("phone_number"),
+		field.String("phone_number").
+			NotEmpty(),
 	}
 }
 

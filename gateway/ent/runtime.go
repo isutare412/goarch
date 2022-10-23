@@ -30,6 +30,10 @@ func init() {
 	admin.DefaultUpdateTime = adminDescUpdateTime.Default.(func() time.Time)
 	// admin.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	admin.UpdateDefaultUpdateTime = adminDescUpdateTime.UpdateDefault.(func() time.Time)
+	// adminDescPhoneNumber is the schema descriptor for phone_number field.
+	adminDescPhoneNumber := adminFields[0].Descriptor()
+	// admin.PhoneNumberValidator is a validator for the "phone_number" field. It is called by the builders before save.
+	admin.PhoneNumberValidator = adminDescPhoneNumber.Validators[0].(func(string) error)
 	meetingMixin := schema.Meeting{}.Mixin()
 	meetingMixinFields0 := meetingMixin[0].Fields()
 	_ = meetingMixinFields0

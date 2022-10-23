@@ -134,6 +134,11 @@ func (au *AdminUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (au *AdminUpdate) check() error {
+	if v, ok := au.mutation.PhoneNumber(); ok {
+		if err := admin.PhoneNumberValidator(v); err != nil {
+			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "Admin.phone_number": %w`, err)}
+		}
+	}
 	if _, ok := au.mutation.UserID(); au.mutation.UserCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Admin.user"`)
 	}
@@ -344,6 +349,11 @@ func (auo *AdminUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (auo *AdminUpdateOne) check() error {
+	if v, ok := auo.mutation.PhoneNumber(); ok {
+		if err := admin.PhoneNumberValidator(v); err != nil {
+			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "Admin.phone_number": %w`, err)}
+		}
+	}
 	if _, ok := auo.mutation.UserID(); auo.mutation.UserCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Admin.user"`)
 	}
