@@ -1,10 +1,11 @@
 package config
 
 type Config struct {
-	Logger *LoggerConfig `yaml:"logger"`
+	Logger   LoggerConfig   `yaml:"logger"`
+	Postgres PostgresConfig `yaml:"postgres"`
 }
 
-func (c *Config) Validate() error {
+func (c Config) Validate() error {
 	return c.Logger.Validate()
 }
 
@@ -13,6 +14,14 @@ type LoggerConfig struct {
 	StackTrace bool      `yaml:"stackTrace"`
 }
 
-func (c *LoggerConfig) Validate() error {
+func (c LoggerConfig) Validate() error {
 	return c.Format.Validate()
+}
+
+type PostgresConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Database string `yaml:"database"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
 }

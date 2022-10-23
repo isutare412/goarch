@@ -1,3 +1,9 @@
 logger:
   format: text # text / json
   stackTrace: false
+postgres:
+  host: localhost
+  port: 59183
+  database: goarch
+  user: user
+  password: user123

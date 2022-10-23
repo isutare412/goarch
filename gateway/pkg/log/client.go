@@ -14,7 +14,7 @@ var (
 	globalAccessLogger  *zap.Logger        = zap.NewNop()
 )
 
-func Init(cfg *config.LoggerConfig) error {
+func Init(cfg config.LoggerConfig) error {
 	var zCfg zap.Config
 	if cfg.Format == config.LogFormatJson {
 		zCfg = jsonLoggerConfig()
@@ -61,15 +61,15 @@ func Sync() {
 
 func textLoggerConfig() zap.Config {
 	cfg := zap.NewDevelopmentConfig()
-	cfg.EncoderConfig.CallerKey = "caller"
-	cfg.EncoderConfig.FunctionKey = "func"
+	cfg.EncoderConfig.CallerKey = "C"
+	cfg.EncoderConfig.FunctionKey = "F"
 	cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	return cfg
 }
 
 func jsonLoggerConfig() zap.Config {
 	cfg := zap.NewProductionConfig()
-	cfg.EncoderConfig.CallerKey = zapcore.OmitKey
+	cfg.EncoderConfig.CallerKey = "caller"
 	cfg.EncoderConfig.FunctionKey = "func"
 	return cfg
 }
