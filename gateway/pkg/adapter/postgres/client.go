@@ -8,6 +8,7 @@ import (
 	"github.com/isutare412/goarch/gateway/ent"
 	"github.com/isutare412/goarch/gateway/pkg/config"
 	"github.com/isutare412/goarch/gateway/pkg/core/port"
+	"github.com/isutare412/goarch/gateway/pkg/log"
 	_ "github.com/lib/pq"
 )
 
@@ -88,7 +89,9 @@ func (c *Client) WithTx(ctx context.Context, fn func(ctx context.Context) error)
 
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				log.WithOperation("Rollback").Error(err)
+			}
 			panic(v)
 		}
 	}()

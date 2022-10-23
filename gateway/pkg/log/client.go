@@ -41,12 +41,15 @@ func Init(cfg config.LoggerConfig) error {
 	return nil
 }
 
-func S() *zap.SugaredLogger {
+func L() *zap.SugaredLogger {
 	return globalSugaredLogger.With("type", "app")
 }
 
-func L() *zap.Logger {
-	return globalLogger.With(zap.String("type", "app"))
+func WithOperation(name string) *zap.SugaredLogger {
+	return globalSugaredLogger.With(
+		"type", "app",
+		"operation", name,
+	)
 }
 
 func A() *zap.Logger {
