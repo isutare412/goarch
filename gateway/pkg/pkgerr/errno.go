@@ -6,6 +6,7 @@ type Errno int32
 const (
 	ErrnoInternal Errno = iota
 	ErrnoRepository
+	ErrnoEntityNotLoaded
 )
 
 // Bad Request
