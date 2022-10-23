@@ -1,0 +1,21 @@
+version: '3.8'
+networks:
+  app-tier:
+    driver: bridge
+volumes:
+  postgres-volume:
+    driver: local
+services:
+  postgresql:
+    image: bitnami/postgresql:14-debian-11
+    networks:
+      - app-tier
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - postgres-volume:/bitnami/postgresql
+    environment:
+      POSTGRESQL_DATABASE: goarch
+      POSTGRESQL_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD} # password for `postgres` admin
