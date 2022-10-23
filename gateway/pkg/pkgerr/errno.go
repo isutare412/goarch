@@ -10,10 +10,17 @@ const (
 
 // Bad Request
 const (
-	ErrnoEmptyField Errno = 1000 + iota
+	ErrnoBadRequest Errno = 1000 + iota
+	ErrnoEmptyField
 )
 
 // Confict
 const (
-	ErrnoValueAlreadyExists Errno = 2000 + iota
+	ErrnoConflict Errno = 2000 + iota
+	ErrnoValueAlreadyExists
+)
+
+// Not Found
+const (
+	ErrnoNotFound Errno = 3000 + iota
 )
