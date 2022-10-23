@@ -58,6 +58,16 @@ func (s *Service) PromoteUser(ctx context.Context, req dto.PromoteUserRequest) e
 			return fmt.Errorf("finding user(%s): %w", req.Nickname, err)
 		}
 
+		adminExists, err := s.adminRepo.ExistsByNickname(ctx, foundUser.Nickname)
+		if err != nil {
+			return fmt.Errorf("checking existence of admin(%s): %w", foundUser.Nickname, err)
+		} else if adminExists {
+			return pkgerr.Known{
+				Errno:  pkgerr.ErrnoValueAlreadyExists,
+				Simple: fmt.Errorf("admin(%s) already exists", foundUser.Nickname),
+			}
+		}
+
 		_, err = s.adminRepo.Save(ctx, adminToCreate, foundUser.ID)
 		if err != nil {
 			return fmt.Errorf("saving admin(%s): %w", req.Nickname, err)

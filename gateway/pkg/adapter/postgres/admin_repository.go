@@ -56,6 +56,21 @@ func (r *AdminRepository) FindByNicknameWithUser(ctx context.Context, nickname s
 	return adm, nil
 }
 
+func (r *AdminRepository) ExistsByNickname(ctx context.Context, nickname string) (bool, error) {
+	exists, err := r.txClient(ctx).User.
+		Query().
+		Where(user.NicknameEQ(nickname)).
+		QueryAdmin().
+		Exist(ctx)
+	if err != nil {
+		return false, pkgerr.Known{
+			Errno:  pkgerr.ErrnoRepository,
+			Origin: err,
+		}
+	}
+	return exists, nil
+}
+
 func (r *AdminRepository) txClient(ctx context.Context) *ent.Client {
 	if c := txFromCtx(ctx); c != nil {
 		return c
