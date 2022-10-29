@@ -13,6 +13,8 @@ const (
 const (
 	ErrnoBadRequest Errno = 1000 + iota
 	ErrnoEmptyField
+	ErrnoInvalidTime
+	ErrnoDuplicateValue
 )
 
 // Confict
