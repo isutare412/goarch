@@ -54,6 +54,20 @@ func (r *UserRepository) FindByNickname(ctx context.Context, nickname string) (*
 	return usr, nil
 }
 
+func (r *UserRepository) FindByNicknameIn(ctx context.Context, nicknames []string) ([]*ent.User, error) {
+	usrs, err := r.txClient(ctx).User.
+		Query().
+		Where(user.NicknameIn(nicknames...)).
+		All(ctx)
+	if err != nil {
+		return nil, pkgerr.Known{
+			Errno:  pkgerr.ErrnoRepository,
+			Origin: err,
+		}
+	}
+	return usrs, nil
+}
+
 func (r *UserRepository) ExistsByNickname(ctx context.Context, nickname string) (bool, error) {
 	exists, err := r.txClient(ctx).User.
 		Query().
