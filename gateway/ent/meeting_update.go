@@ -79,6 +79,14 @@ func (mu *MeetingUpdate) SetOrganizerID(id int) *MeetingUpdate {
 	return mu
 }
 
+// SetNillableOrganizerID sets the "organizer" edge to the User entity by ID if the given value is not nil.
+func (mu *MeetingUpdate) SetNillableOrganizerID(id *int) *MeetingUpdate {
+	if id != nil {
+		mu = mu.SetOrganizerID(*id)
+	}
+	return mu
+}
+
 // SetOrganizer sets the "organizer" edge to the User entity.
 func (mu *MeetingUpdate) SetOrganizer(u *User) *MeetingUpdate {
 	return mu.SetOrganizerID(u.ID)
@@ -206,9 +214,6 @@ func (mu *MeetingUpdate) check() error {
 		if err := meeting.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Meeting.title": %w`, err)}
 		}
-	}
-	if _, ok := mu.mutation.OrganizerID(); mu.mutation.OrganizerCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Meeting.organizer"`)
 	}
 	return nil
 }
@@ -430,6 +435,14 @@ func (muo *MeetingUpdateOne) SetOrganizerID(id int) *MeetingUpdateOne {
 	return muo
 }
 
+// SetNillableOrganizerID sets the "organizer" edge to the User entity by ID if the given value is not nil.
+func (muo *MeetingUpdateOne) SetNillableOrganizerID(id *int) *MeetingUpdateOne {
+	if id != nil {
+		muo = muo.SetOrganizerID(*id)
+	}
+	return muo
+}
+
 // SetOrganizer sets the "organizer" edge to the User entity.
 func (muo *MeetingUpdateOne) SetOrganizer(u *User) *MeetingUpdateOne {
 	return muo.SetOrganizerID(u.ID)
@@ -570,9 +583,6 @@ func (muo *MeetingUpdateOne) check() error {
 		if err := meeting.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Meeting.title": %w`, err)}
 		}
-	}
-	if _, ok := muo.mutation.OrganizerID(); muo.mutation.OrganizerCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Meeting.organizer"`)
 	}
 	return nil
 }

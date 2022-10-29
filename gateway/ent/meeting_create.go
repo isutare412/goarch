@@ -87,6 +87,14 @@ func (mc *MeetingCreate) SetOrganizerID(id int) *MeetingCreate {
 	return mc
 }
 
+// SetNillableOrganizerID sets the "organizer" edge to the User entity by ID if the given value is not nil.
+func (mc *MeetingCreate) SetNillableOrganizerID(id *int) *MeetingCreate {
+	if id != nil {
+		mc = mc.SetOrganizerID(*id)
+	}
+	return mc
+}
+
 // SetOrganizer sets the "organizer" edge to the User entity.
 func (mc *MeetingCreate) SetOrganizer(u *User) *MeetingCreate {
 	return mc.SetOrganizerID(u.ID)
@@ -215,9 +223,6 @@ func (mc *MeetingCreate) check() error {
 	}
 	if _, ok := mc.mutation.EndsAt(); !ok {
 		return &ValidationError{Name: "ends_at", err: errors.New(`ent: missing required field "Meeting.ends_at"`)}
-	}
-	if _, ok := mc.mutation.OrganizerID(); !ok {
-		return &ValidationError{Name: "organizer", err: errors.New(`ent: missing required edge "Meeting.organizer"`)}
 	}
 	return nil
 }

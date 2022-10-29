@@ -39,7 +39,7 @@ var (
 		{Name: "starts_at", Type: field.TypeTime},
 		{Name: "ends_at", Type: field.TypeTime},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "user_organizes", Type: field.TypeInt},
+		{Name: "user_organizes", Type: field.TypeInt, Nullable: true},
 	}
 	// MeetingsTable holds the schema information for the "meetings" table.
 	MeetingsTable = &schema.Table{
