@@ -35,10 +35,10 @@ func (r *MeetingRepository) Save(ctx context.Context, mtg *ent.Meeting, orgID in
 	return mtg, nil
 }
 
-func (r *MeetingRepository) ExistsByID(ctx context.Context, id int) (bool, error) {
+func (r *MeetingRepository) ExistsByID(ctx context.Context, mtgID int) (bool, error) {
 	exists, err := r.txClient(ctx).Meeting.
 		Query().
-		Where(meeting.ID(id)).
+		Where(meeting.ID(mtgID)).
 		Exist(ctx)
 	if err != nil {
 		return false, pkgerr.Known{
@@ -77,9 +77,29 @@ func (r *MeetingRepository) RemoveParticipants(ctx context.Context, mtgID int, p
 	return nil
 }
 
-func (r *MeetingRepository) ParticipantsByIDs(ctx context.Context, ptcIDs []int) ([]*ent.User, error) {
+func (r *MeetingRepository) FindParticipantsByID(ctx context.Context, mtgID int) ([]*ent.User, error) {
 	usrs, err := r.txClient(ctx).Meeting.
 		Query().
+		Where(meeting.ID(mtgID)).
+		QueryParticipants().
+		All(ctx)
+	if err != nil {
+		return nil, pkgerr.Known{
+			Errno:  pkgerr.ErrnoRepository,
+			Origin: err,
+		}
+	}
+	return usrs, nil
+}
+
+func (r *MeetingRepository) FindParticipantsByIDAndParticipantIDs(
+	ctx context.Context,
+	mtgID int,
+	ptcIDs []int,
+) ([]*ent.User, error) {
+	usrs, err := r.txClient(ctx).Meeting.
+		Query().
+		Where(meeting.ID(mtgID)).
 		QueryParticipants().
 		Where(user.IDIn(ptcIDs...)).
 		All(ctx)

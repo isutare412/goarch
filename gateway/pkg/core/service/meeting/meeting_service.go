@@ -76,7 +76,7 @@ func (s *Service) AddParticipants(ctx context.Context, req dto.AddParticipantsRe
 			userIDsToParticipate = append(userIDsToParticipate, u.ID)
 		}
 
-		participants, err := s.meetingRepo.ParticipantsByIDs(ctx, userIDsToParticipate)
+		participants, err := s.meetingRepo.FindParticipantsByIDAndParticipantIDs(ctx, req.MeetingID, userIDsToParticipate)
 		if err != nil {
 			return fmt.Errorf("checking participants existence: %w", err)
 		} else if len(participants) > 0 {

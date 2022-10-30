@@ -8,9 +8,10 @@ import (
 
 type MeetingRepository interface {
 	Save(ctx context.Context, mtg *ent.Meeting, orgID int) (*ent.Meeting, error)
-	ExistsByID(ctx context.Context, id int) (bool, error)
+	ExistsByID(ctx context.Context, mtgID int) (bool, error)
 
 	AddParticipants(ctx context.Context, mtgID int, ptcIDs []int) error
 	RemoveParticipants(ctx context.Context, mtgID int, ptcIDs []int) error
-	ParticipantsByIDs(ctx context.Context, ptcIDs []int) ([]*ent.User, error)
+	FindParticipantsByID(ctx context.Context, mtgID int) ([]*ent.User, error)
+	FindParticipantsByIDAndParticipantIDs(ctx context.Context, mtgID int, ptcIDs []int) ([]*ent.User, error)
 }
