@@ -1,3 +1,6 @@
+main:
+  initTimeout: 30s
+  shutdownTimeout: 30s
 logger:
   format: text # text / json
   reportCaller: false

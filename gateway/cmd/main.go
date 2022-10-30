@@ -30,12 +30,17 @@ func main() {
 		log.L().Fatalf("Failed during denpendency injection: %v", err)
 	}
 
-	// TODO: Use timeout from config
-	if err := cmps.Init(context.TODO()); err != nil {
+	initCtx, cancel := context.WithTimeout(context.Background(), cfg.Main.InitTimeout)
+	defer cancel()
+
+	if err := cmps.Init(initCtx); err != nil {
 		log.L().Fatalf("Initializing components: %v", err)
 	}
 
 	cmps.RunAndWait()
 
-	cmps.Shutdown(context.TODO())
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Main.ShutdownTimeout)
+	defer cancel()
+
+	cmps.Shutdown(shutdownCtx)
 }
