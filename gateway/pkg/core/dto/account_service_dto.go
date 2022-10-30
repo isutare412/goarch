@@ -8,8 +8,8 @@ import (
 )
 
 type CreateUserRequest struct {
-	Nickname string
-	Email    *string
+	Nickname string  `json:"nickname" example:"redshore"`
+	Email    *string `json:"email" example:"foo@bar.com"`
 }
 
 func (r CreateUserRequest) Validate() error {
@@ -64,7 +64,7 @@ func (r PromoteUserRequest) IntoAdmin() *ent.Admin {
 }
 
 type GetUserByNicknameRequest struct {
-	Nickname string
+	Nickname string `json:"nickname" example:"redshore"`
 }
 
 func (r GetUserByNicknameRequest) Validate() error {

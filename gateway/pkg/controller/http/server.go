@@ -17,6 +17,9 @@ type Server struct {
 	accSvc port.AccountService
 	mtgSvc port.MeetingService
 
+	userHdr  *userHandler
+	adminHdr *adminHandler
+
 	engine *gin.Engine
 	srv    *http.Server
 }
@@ -24,6 +27,7 @@ type Server struct {
 func (s *Server) Init() {
 	s.initEngine()
 	s.initHandlers()
+	s.initRoutes()
 
 	s.srv = &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port),
@@ -55,6 +59,21 @@ func (s *Server) initEngine() {
 }
 
 func (s *Server) initHandlers() {
+	s.userHdr = &userHandler{
+		accSvc: s.accSvc,
+	}
+
+	s.adminHdr = &adminHandler{
+		accSvc: s.accSvc,
+	}
+}
+
+func (s *Server) initRoutes() {
+	// TODO: Add middlewares
+	api := s.engine.Group("/api/v1")
+	s.userHdr.registerRoutes(api)
+	s.adminHdr.registerRoutes(api)
+
 	s.engine.GET("/dev", func(c *gin.Context) {
 		log.L().With("headers", c.Request.Header).Info("Dev API called")
 	})
