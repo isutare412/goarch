@@ -252,51 +252,27 @@ func (mc *MeetingCreate) createSpec() (*Meeting, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := mc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldCreateTime,
-		})
+		_spec.SetField(meeting.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := mc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldUpdateTime,
-		})
+		_spec.SetField(meeting.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := mc.mutation.Title(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: meeting.FieldTitle,
-		})
+		_spec.SetField(meeting.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
 	if value, ok := mc.mutation.StartsAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldStartsAt,
-		})
+		_spec.SetField(meeting.FieldStartsAt, field.TypeTime, value)
 		_node.StartsAt = value
 	}
 	if value, ok := mc.mutation.EndsAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldEndsAt,
-		})
+		_spec.SetField(meeting.FieldEndsAt, field.TypeTime, value)
 		_node.EndsAt = value
 	}
 	if value, ok := mc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: meeting.FieldDescription,
-		})
+		_spec.SetField(meeting.FieldDescription, field.TypeString, value)
 		_node.Description = &value
 	}
 	if nodes := mc.mutation.OrganizerIDs(); len(nodes) > 0 {

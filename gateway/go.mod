@@ -3,7 +3,7 @@ module github.com/isutare412/goarch/gateway
 go 1.19
 
 require (
-	entgo.io/ent v0.11.3
+	entgo.io/ent v0.11.4
 	github.com/gin-gonic/gin v1.8.1
 	github.com/lib/pq v1.10.7
 	github.com/spf13/viper v1.13.0

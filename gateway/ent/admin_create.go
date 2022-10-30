@@ -200,27 +200,15 @@ func (ac *AdminCreate) createSpec() (*Admin, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := ac.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: admin.FieldCreateTime,
-		})
+		_spec.SetField(admin.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := ac.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: admin.FieldUpdateTime,
-		})
+		_spec.SetField(admin.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := ac.mutation.PhoneNumber(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: admin.FieldPhoneNumber,
-		})
+		_spec.SetField(admin.FieldPhoneNumber, field.TypeString, value)
 		_node.PhoneNumber = value
 	}
 	if nodes := ac.mutation.UserIDs(); len(nodes) > 0 {

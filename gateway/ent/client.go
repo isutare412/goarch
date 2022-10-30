@@ -193,7 +193,7 @@ func (c *AdminClient) DeleteOne(a *Admin) *AdminDeleteOne {
 	return c.DeleteOneID(a.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *AdminClient) DeleteOneID(id int) *AdminDeleteOne {
 	builder := c.Delete().Where(admin.ID(id))
 	builder.mutation.id = &id
@@ -225,7 +225,7 @@ func (c *AdminClient) GetX(ctx context.Context, id int) *Admin {
 // QueryUser queries the user edge of a Admin.
 func (c *AdminClient) QueryUser(a *Admin) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(admin.Table, admin.FieldID, id),
@@ -299,7 +299,7 @@ func (c *MeetingClient) DeleteOne(m *Meeting) *MeetingDeleteOne {
 	return c.DeleteOneID(m.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MeetingClient) DeleteOneID(id int) *MeetingDeleteOne {
 	builder := c.Delete().Where(meeting.ID(id))
 	builder.mutation.id = &id
@@ -331,7 +331,7 @@ func (c *MeetingClient) GetX(ctx context.Context, id int) *Meeting {
 // QueryOrganizer queries the organizer edge of a Meeting.
 func (c *MeetingClient) QueryOrganizer(m *Meeting) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(meeting.Table, meeting.FieldID, id),
@@ -347,7 +347,7 @@ func (c *MeetingClient) QueryOrganizer(m *Meeting) *UserQuery {
 // QueryParticipants queries the participants edge of a Meeting.
 func (c *MeetingClient) QueryParticipants(m *Meeting) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(meeting.Table, meeting.FieldID, id),
@@ -421,7 +421,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
@@ -453,7 +453,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryAdmin queries the admin edge of a User.
 func (c *UserClient) QueryAdmin(u *User) *AdminQuery {
 	query := &AdminQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -469,7 +469,7 @@ func (c *UserClient) QueryAdmin(u *User) *AdminQuery {
 // QueryOrganizes queries the organizes edge of a User.
 func (c *UserClient) QueryOrganizes(u *User) *MeetingQuery {
 	query := &MeetingQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -485,7 +485,7 @@ func (c *UserClient) QueryOrganizes(u *User) *MeetingQuery {
 // QueryMeetings queries the meetings edge of a User.
 func (c *UserClient) QueryMeetings(u *User) *MeetingQuery {
 	query := &MeetingQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

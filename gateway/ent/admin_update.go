@@ -164,18 +164,10 @@ func (au *AdminUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := au.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: admin.FieldUpdateTime,
-		})
+		_spec.SetField(admin.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := au.mutation.PhoneNumber(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: admin.FieldPhoneNumber,
-		})
+		_spec.SetField(admin.FieldPhoneNumber, field.TypeString, value)
 	}
 	if au.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -396,18 +388,10 @@ func (auo *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error
 		}
 	}
 	if value, ok := auo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: admin.FieldUpdateTime,
-		})
+		_spec.SetField(admin.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := auo.mutation.PhoneNumber(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: admin.FieldPhoneNumber,
-		})
+		_spec.SetField(admin.FieldPhoneNumber, field.TypeString, value)
 	}
 	if auo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

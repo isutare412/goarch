@@ -237,45 +237,22 @@ func (mu *MeetingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := mu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldUpdateTime,
-		})
+		_spec.SetField(meeting.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := mu.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: meeting.FieldTitle,
-		})
+		_spec.SetField(meeting.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := mu.mutation.StartsAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldStartsAt,
-		})
+		_spec.SetField(meeting.FieldStartsAt, field.TypeTime, value)
 	}
 	if value, ok := mu.mutation.EndsAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldEndsAt,
-		})
+		_spec.SetField(meeting.FieldEndsAt, field.TypeTime, value)
 	}
 	if value, ok := mu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: meeting.FieldDescription,
-		})
+		_spec.SetField(meeting.FieldDescription, field.TypeString, value)
 	}
 	if mu.mutation.DescriptionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: meeting.FieldDescription,
-		})
+		_spec.ClearField(meeting.FieldDescription, field.TypeString)
 	}
 	if mu.mutation.OrganizerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -623,45 +600,22 @@ func (muo *MeetingUpdateOne) sqlSave(ctx context.Context) (_node *Meeting, err e
 		}
 	}
 	if value, ok := muo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldUpdateTime,
-		})
+		_spec.SetField(meeting.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := muo.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: meeting.FieldTitle,
-		})
+		_spec.SetField(meeting.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := muo.mutation.StartsAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldStartsAt,
-		})
+		_spec.SetField(meeting.FieldStartsAt, field.TypeTime, value)
 	}
 	if value, ok := muo.mutation.EndsAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: meeting.FieldEndsAt,
-		})
+		_spec.SetField(meeting.FieldEndsAt, field.TypeTime, value)
 	}
 	if value, ok := muo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: meeting.FieldDescription,
-		})
+		_spec.SetField(meeting.FieldDescription, field.TypeString, value)
 	}
 	if muo.mutation.DescriptionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: meeting.FieldDescription,
-		})
+		_spec.ClearField(meeting.FieldDescription, field.TypeString)
 	}
 	if muo.mutation.OrganizerCleared() {
 		edge := &sqlgraph.EdgeSpec{
