@@ -14,8 +14,7 @@ var cfgPath = flag.String("config", "configs/config.yaml", "path to yaml config 
 func main() {
 	flag.Parse()
 
-	// TODO: Change to value
-	var cfg *config.Config
+	var cfg config.Config
 	cfg, err := config.LoadValidated(*cfgPath)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to load valid config: %v", err))
@@ -27,7 +26,7 @@ func main() {
 	defer log.Sync()
 
 	var cmps components
-	if err := cmps.DependencyInjection(*cfg); err != nil {
+	if err := cmps.DependencyInjection(cfg); err != nil {
 		log.L().Fatalf("Failed during denpendency injection: %v", err)
 	}
 

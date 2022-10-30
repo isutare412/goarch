@@ -21,7 +21,7 @@ type components struct {
 }
 
 func (c *components) DependencyInjection(cfg config.Config) error {
-	log.L().Info("Dependency injection started")
+	log.L().Info("Start dependency injection")
 
 	postgresClient, err := postgres.NewClient(cfg.Postgres)
 	if err != nil {
@@ -53,12 +53,12 @@ func (c *components) DependencyInjection(cfg config.Config) error {
 	c.postgresClient = postgresClient
 	c.httpServer = httpServer
 
-	log.L().Info("Dependency injection finished")
+	log.L().Info("Done dependency injection")
 	return nil
 }
 
 func (c *components) Init(ctx context.Context) error {
-	log.L().Info("Components initialization started")
+	log.L().Info("Start components initialization")
 
 	if err := c.postgresClient.MigrateSchemas(ctx); err != nil {
 		return fmt.Errorf("migrating schemas: %w", err)
@@ -68,7 +68,7 @@ func (c *components) Init(ctx context.Context) error {
 	c.httpServer.Init()
 	log.L().Info("Initialized HTTP server")
 
-	log.L().Info("Components initialization finished")
+	log.L().Info("Done components initialization")
 	return nil
 }
 
@@ -88,10 +88,14 @@ func (c *components) RunAndWait() {
 }
 
 func (c *components) Shutdown(ctx context.Context) {
+	log.L().Info("Start graceful shutdown")
+
 	if err := c.httpServer.Shutdown(ctx); err != nil {
 		log.L().Errorf("Failed to shutdown HTTP server: %v", err)
 	}
 	if err := c.postgresClient.Close(ctx); err != nil {
 		log.L().Errorf("Failed to shutdown PostgreSQL client: %v", err)
 	}
+
+	log.L().Info("Done graceful shutdown")
 }

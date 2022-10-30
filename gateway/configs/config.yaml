@@ -1,5 +1,6 @@
 logger:
   format: text # text / json
+  reportCaller: false
   stackTrace: false
 server:
   http:

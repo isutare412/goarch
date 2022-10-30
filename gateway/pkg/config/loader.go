@@ -7,27 +7,30 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Load(path string) (*Config, error) {
+func Load(path string) (Config, error) {
+	var cfg Config
+
 	if err := readFile(path); err != nil {
-		return nil, err
+		return cfg, err
 	}
 	readEnv()
 
-	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		return nil, err
+		return cfg, err
 	}
-	return &cfg, nil
+	return cfg, nil
 }
 
-func LoadValidated(path string) (*Config, error) {
+func LoadValidated(path string) (Config, error) {
+	var cfg Config
+
 	cfg, err := Load(path)
 	if err != nil {
-		return nil, fmt.Errorf("loading config: %w", err)
+		return cfg, fmt.Errorf("loading config: %w", err)
 	}
 
 	if err := cfg.Validate(); err != nil {
-		return nil, fmt.Errorf("validating config: %w", err)
+		return cfg, fmt.Errorf("validating config: %w", err)
 	}
 	return cfg, nil
 }

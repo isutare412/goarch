@@ -11,8 +11,9 @@ func (c Config) Validate() error {
 }
 
 type LoggerConfig struct {
-	Format     LogFormat `yaml:"format"`
-	StackTrace bool      `yaml:"stackTrace"`
+	Format       LogFormat `yaml:"format"`
+	ReportCaller bool      `yaml:"reportCaller"`
+	StackTrace   bool      `yaml:"stackTrace"`
 }
 
 func (c LoggerConfig) Validate() error {

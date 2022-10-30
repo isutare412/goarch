@@ -22,6 +22,7 @@ func Init(cfg config.LoggerConfig) error {
 		zCfg = textLoggerConfig()
 	}
 	zCfg.DisableStacktrace = !cfg.StackTrace
+	zCfg.DisableCaller = !cfg.ReportCaller
 
 	var logger *zap.Logger
 	logger, err := zCfg.Build()
