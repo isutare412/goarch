@@ -25,3 +25,7 @@ ent-describe: ## Describe schemas of entity models.
 .PHONY: run
 run: ## Run server locally.
 	go run ./cmd
+
+.PHONY: test
+test: ## Run tests.
+	go test ./...
