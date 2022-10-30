@@ -7,7 +7,7 @@ import (
 )
 
 type errorResponse struct {
-	Msg string `json:"msg"`
+	Msg string `json:"msg" example:"error message"`
 }
 
 type pathParameters struct {

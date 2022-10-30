@@ -1,0 +1,124 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Gateway of Goarch system.",
+        "title": "Goarch Gateway",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/v1/users": {
+            "post": {
+                "description": "Request user creation.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "description": "Request to create user",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "default": {
+                        "description": "Something went wrong.",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/{nickname}": {
+            "get": {
+                "description": "Request user information.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "x-example": "redshore",
+                        "description": "Nickname of user.",
+                        "name": "nickname",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetUserByNicknameResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Something went wrong.",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "foo@bar.com"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "redshore"
+                }
+            }
+        },
+        "dto.GetUserByNicknameResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2022-10-30T09:04:22.799572Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "foo@bar.com"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "redshore"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2022-10-30T09:04:22.799572Z"
+                }
+            }
+        },
+        "http.errorResponse": {
+            "type": "object",
+            "properties": {
+                "msg": {
+                    "type": "string",
+                    "example": "error message"
+                }
+            }
+        }
+    }
+}

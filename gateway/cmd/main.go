@@ -11,6 +11,9 @@ import (
 
 var cfgPath = flag.String("config", "configs/config.yaml", "path to yaml config file")
 
+// @Title Goarch Gateway
+// @Version 1.0
+// @Description Gateway of Goarch system.
 func main() {
 	flag.Parse()
 

@@ -1,0 +1,82 @@
+definitions:
+  dto.CreateUserRequest:
+    properties:
+      email:
+        example: foo@bar.com
+        type: string
+      nickname:
+        example: redshore
+        type: string
+    type: object
+  dto.GetUserByNicknameResponse:
+    properties:
+      created_at:
+        example: "2022-10-30T09:04:22.799572Z"
+        type: string
+      email:
+        example: foo@bar.com
+        type: string
+      nickname:
+        example: redshore
+        type: string
+      updated_at:
+        example: "2022-10-30T09:04:22.799572Z"
+        type: string
+    type: object
+  http.errorResponse:
+    properties:
+      msg:
+        example: error message
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Gateway of Goarch system.
+  title: Goarch Gateway
+  version: "1.0"
+paths:
+  /api/v1/users:
+    post:
+      description: Request user creation.
+      parameters:
+      - description: Request to create user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        default:
+          description: Something went wrong.
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      tags:
+      - User
+  /api/v1/users/{nickname}:
+    get:
+      description: Request user information.
+      parameters:
+      - description: Nickname of user.
+        in: path
+        name: nickname
+        required: true
+        type: string
+        x-example: redshore
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetUserByNicknameResponse'
+        default:
+          description: Something went wrong.
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      tags:
+      - User
+swagger: "2.0"

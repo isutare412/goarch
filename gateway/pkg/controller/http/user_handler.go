@@ -18,6 +18,13 @@ func (h *userHandler) registerRoutes(g *gin.RouterGroup) {
 	g.POST("/users", h.createUser)
 }
 
+// @Tags        User
+// @Description Request user information.
+// @Router      /api/v1/users/{nickname} [GET]
+// @Param       nickname path string true "Nickname of user." extensions(x-example=redshore)
+// @Produce     json
+// @Success     200     {object} dto.GetUserByNicknameResponse
+// @Failure     default {object} errorResponse "Something went wrong."
 func (h *userHandler) getUser(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -43,6 +50,13 @@ func (h *userHandler) getUser(c *gin.Context) {
 	responseJSON(c, http.StatusOK, resp)
 }
 
+// @Tags        User
+// @Description Request user creation.
+// @Router      /api/v1/users [POST]
+// @Param       request body dto.CreateUserRequest true "Request to create user"
+// @Produce     json
+// @Success     201
+// @Failure     default {object} errorResponse "Something went wrong."
 func (h *userHandler) createUser(c *gin.Context) {
 	ctx := c.Request.Context()
 

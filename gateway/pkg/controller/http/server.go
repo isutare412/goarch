@@ -6,9 +6,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/isutare412/goarch/gateway/api"
 	"github.com/isutare412/goarch/gateway/pkg/config"
 	"github.com/isutare412/goarch/gateway/pkg/core/port"
 	"github.com/isutare412/goarch/gateway/pkg/log"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -69,12 +72,15 @@ func (s *Server) initHandlers() {
 }
 
 func (s *Server) initRoutes() {
+	root := s.engine
+	root.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// TODO: Add middlewares
-	api := s.engine.Group("/api/v1")
+	api := root.Group("/api/v1")
 	s.userHdr.registerRoutes(api)
 	s.adminHdr.registerRoutes(api)
 
-	s.engine.GET("/dev", func(c *gin.Context) {
+	root.GET("/dev", func(c *gin.Context) {
 		log.L().With("headers", c.Request.Header).Info("Dev API called")
 	})
 }
