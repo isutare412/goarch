@@ -32,19 +32,19 @@ func (c *components) DependencyInjection(cfg config.Config) error {
 	adminRepository := postgres.NewAdminRepository(postgresClient)
 	meetingRepository := postgres.NewMeetingRepository(postgresClient)
 
-	accountService := account.ServiceBuilder().
+	accountService := account.NewServiceBuilder().
 		WithRepositorySession(postgresClient).
 		WithUserRepository(userRepository).
 		WithAdminRepository(adminRepository).
 		Build()
 
-	meetingService := meeting.ServiceBuilder().
+	meetingService := meeting.NewServiceBuilder().
 		WithRepositorySession(postgresClient).
 		WithUserRepository(userRepository).
 		WithMeetingRepository(meetingRepository).
 		Build()
 
-	httpServer := http.ServerBuilder().
+	httpServer := http.NewServerBuilder().
 		WithHTTPServerConfig(cfg.Server.HTTP).
 		WithAccountService(accountService).
 		WithMeetingService(meetingService).

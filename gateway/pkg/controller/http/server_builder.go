@@ -12,7 +12,7 @@ type serverBuilder struct {
 	mtgSvc port.MeetingService
 }
 
-func ServerBuilder() serverBuilder { return serverBuilder{} }
+func NewServerBuilder() serverBuilder { return serverBuilder{} }
 
 func (b serverBuilder) WithHTTPServerConfig(cfg config.HTTPServerConfig) serverBuilder {
 	b.cfg = cfg

@@ -56,6 +56,6 @@ func (s *Server) initEngine() {
 
 func (s *Server) initHandlers() {
 	s.engine.GET("/dev", func(c *gin.Context) {
-		log.L().With("headers", c.Request.Header).Debug("Dev API called")
+		log.L().With("headers", c.Request.Header).Info("Dev API called")
 	})
 }

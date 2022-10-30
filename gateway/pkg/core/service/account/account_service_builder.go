@@ -8,7 +8,7 @@ type serviceBuilder struct {
 	adminRepo   port.AdminRepository
 }
 
-func ServiceBuilder() serviceBuilder { return serviceBuilder{} }
+func NewServiceBuilder() serviceBuilder { return serviceBuilder{} }
 
 func (b serviceBuilder) WithRepositorySession(repoSession port.RepositorySession) serviceBuilder {
 	b.repoSession = repoSession
