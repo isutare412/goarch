@@ -22,6 +22,7 @@ ent-gen: ## Generate codes from entity models.
 ent-describe: ## Describe schemas of entity models.
 	go run -mod=readonly entgo.io/ent/cmd/ent describe ./ent/schema
 
+.PHONY: docs
 docs: ## Generate OpenAPI specification for Swagger UI.
 	go run -mod=readonly github.com/swaggo/swag/cmd/swag init \
 		-d "${ROOTDIR}/cmd,${ROOTDIR}/pkg/controller/http,${ROOTDIR}/pkg/core/dto" \
