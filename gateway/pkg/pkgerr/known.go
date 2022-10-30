@@ -1,6 +1,9 @@
 package pkgerr
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type Known struct {
 	Errno  Errno
@@ -30,4 +33,12 @@ func (k Known) SimpleError() string {
 		return k.Origin.Error()
 	}
 	return k.Simple.Error()
+}
+
+func AsKnown(err error) *Known {
+	var kerr Known
+	if errors.As(err, &kerr) {
+		return &kerr
+	}
+	return nil
 }
