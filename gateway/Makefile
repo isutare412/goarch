@@ -12,15 +12,15 @@ help: ## Display this help.
 
 .PHONY: ent-init
 ent-init: ## Define a new entity of TARGET_ENTITY.
-	go run -mod=readonly entgo.io/ent/cmd/ent init ${TARGET_ENTITY}
+	go run -mod=readonly entgo.io/ent/cmd/ent --target pkg/core/ent/schema init ${TARGET_ENTITY}
 
 .PHONY: ent-gen
 ent-gen: ## Generate codes from entity models.
-	go generate ./ent
+	go generate ./pkg/core/ent
 
 .PHONY: ent-describe
 ent-describe: ## Describe schemas of entity models.
-	go run -mod=readonly entgo.io/ent/cmd/ent describe ./ent/schema
+	go run -mod=readonly entgo.io/ent/cmd/ent describe ./pkg/core/ent/schema
 
 .PHONY: docs
 docs: ## Generate OpenAPI specification for Swagger UI.

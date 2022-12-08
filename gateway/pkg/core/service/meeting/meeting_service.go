@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/isutare412/goarch/gateway/ent"
 	"github.com/isutare412/goarch/gateway/pkg/core/dto"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent"
 	"github.com/isutare412/goarch/gateway/pkg/core/port"
 	"github.com/isutare412/goarch/gateway/pkg/pkgerr"
 )

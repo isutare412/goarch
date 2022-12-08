@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/isutare412/goarch/gateway/ent"
+	_ "github.com/lib/pq"
+
 	"github.com/isutare412/goarch/gateway/pkg/config"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent"
 	"github.com/isutare412/goarch/gateway/pkg/core/port"
 	"github.com/isutare412/goarch/gateway/pkg/log"
-	_ "github.com/lib/pq"
 )
 
 type Client struct {

@@ -3,9 +3,9 @@ package postgres
 import (
 	"context"
 
-	"github.com/isutare412/goarch/gateway/ent"
-	"github.com/isutare412/goarch/gateway/ent/meeting"
-	"github.com/isutare412/goarch/gateway/ent/user"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent/meeting"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent/user"
 	"github.com/isutare412/goarch/gateway/pkg/pkgerr"
 )
 

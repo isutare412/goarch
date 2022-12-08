@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 
-	"github.com/isutare412/goarch/gateway/ent"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent"
 )
 
 type AdminRepository interface {

@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/isutare412/goarch/gateway/ent"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent"
 )
 
 type User struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/isutare412/goarch/gateway/ent"
+	"github.com/isutare412/goarch/gateway/pkg/core/ent"
 	"github.com/isutare412/goarch/gateway/pkg/pkgerr"
 )
 

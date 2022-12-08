@@ -3,8 +3,9 @@ package meeting
 import (
 	"testing"
 
-	"github.com/isutare412/goarch/gateway/ent"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/isutare412/goarch/gateway/pkg/core/ent"
 )
 
 func TestSearchUserNotFoundNicknames(t *testing.T) {
