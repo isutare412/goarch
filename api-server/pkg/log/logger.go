@@ -24,42 +24,42 @@ var (
 )
 
 func Init(cfg Config) {
-	zapCfg := baseZapConfig()
+	zcfg := baseZapConfig()
 
 	switch cfg.Format {
 	case FormatJSON:
-		zapCfg.Encoding = "json"
+		zcfg.Encoding = "json"
 	case FormatText:
-		zapCfg.Encoding = "console"
+		zcfg.Encoding = "console"
 	}
 
 	switch cfg.Level {
 	case LevelDebug:
-		zapCfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+		zcfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	case LevelInfo:
-		zapCfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+		zcfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
 	case LevelWarn:
-		zapCfg.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
+		zcfg.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
 	case LevelError:
-		zapCfg.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
+		zcfg.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 	case LevelPanic:
-		zapCfg.Level = zap.NewAtomicLevelAt(zap.PanicLevel)
+		zcfg.Level = zap.NewAtomicLevelAt(zap.PanicLevel)
 	case LevelFatal:
-		zapCfg.Level = zap.NewAtomicLevelAt(zap.FatalLevel)
+		zcfg.Level = zap.NewAtomicLevelAt(zap.FatalLevel)
 	}
 
 	if cfg.Development {
-		zapCfg.Development = true
-		zapCfg.EncoderConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+		zcfg.Development = true
+		zcfg.EncoderConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 	} else {
-		zapCfg.Development = false
-		zapCfg.EncoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
+		zcfg.Development = false
+		zcfg.EncoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
 	}
 
-	zapCfg.DisableStacktrace = !cfg.StackTrace
-	zapCfg.DisableCaller = !cfg.Caller
+	zcfg.DisableStacktrace = !cfg.StackTrace
+	zcfg.DisableCaller = !cfg.Caller
 
-	logger, err := zapCfg.Build()
+	logger, err := zcfg.Build()
 	if err != nil {
 		panic(fmt.Sprintf("failed to build zap logger: %v", err))
 	}

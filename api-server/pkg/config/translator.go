@@ -12,10 +12,10 @@ func NewTranslator(cfg Config) *Translator {
 
 func (t *Translator) ToLogConfig() log.Config {
 	return log.Config{
-		Development: t.cfg.LoggerConfig.Development,
-		Format:      t.cfg.LoggerConfig.Format,
-		Level:       t.cfg.LoggerConfig.Level,
-		StackTrace:  t.cfg.LoggerConfig.StackTrace,
-		Caller:      t.cfg.LoggerConfig.Caller,
+		Development: t.cfg.Logger.Development,
+		Format:      t.cfg.Logger.Format,
+		Level:       t.cfg.Logger.Level,
+		StackTrace:  t.cfg.Logger.StackTrace,
+		Caller:      t.cfg.Logger.Caller,
 	}
 }

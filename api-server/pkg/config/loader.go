@@ -19,7 +19,7 @@ func LoadValidated(path string) (Config, error) {
 	}
 
 	if err := cfg.Validate(); err != nil {
-		return Config{}, fmt.Errorf("validating loaded config: %w", err)
+		return cfg, fmt.Errorf("validating loaded config: %w", err)
 	}
 	return cfg, nil
 }
