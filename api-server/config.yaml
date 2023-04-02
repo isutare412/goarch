@@ -1,0 +1,6 @@
+logger:
+  development: true
+  format: text # text / json
+  level: debug # debug / info / warn / error / panic / fatal
+  stackTrace: false
+  caller: true

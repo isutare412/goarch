@@ -1,5 +1,7 @@
 package log
 
+import "fmt"
+
 type Config struct {
 	Development bool
 	Format      Format
@@ -15,6 +17,15 @@ const (
 	FormatText Format = "text"
 )
 
+func (f Format) Validate() error {
+	switch f {
+	case FormatJSON, FormatText:
+		return nil
+	default:
+		return fmt.Errorf("invalid log format '%s'", f)
+	}
+}
+
 type Level string
 
 const (
@@ -25,3 +36,12 @@ const (
 	LevelPanic Level = "panic"
 	LevelFatal Level = "fatal"
 )
+
+func (l Level) Validate() error {
+	switch l {
+	case LevelDebug, LevelInfo, LevelWarn, LevelError, LevelPanic, LevelFatal:
+		return nil
+	default:
+		return fmt.Errorf("invalid log level '%s'", l)
+	}
+}
