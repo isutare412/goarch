@@ -5,6 +5,7 @@ import (
 
 	"github.com/isutare412/goarch/api-server/pkg/config"
 	"github.com/isutare412/goarch/api-server/pkg/log"
+	"github.com/isutare412/goarch/api-server/pkg/wire"
 )
 
 var configPath = flag.String("config", "config.yaml", "YAML config file path")
@@ -18,10 +19,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	cfgTranslator := config.NewTranslator(cfg)
+	cfgHub := config.NewHub(cfg)
 
-	log.Init(cfgTranslator.ToLogConfig())
+	log.Init(cfgHub.ToLogConfig())
 	defer log.Sync()
 
-	log.L().Info("this is the end")
+	components, err := wire.NewComponents(cfgHub)
+	if err != nil {
+		log.WithOperation("wireComponents").Fatalf("Failed to wire components: %v", err)
+	}
+
+	components.RunAndWait()
+	components.GracefulShutdown()
 }
