@@ -1,3 +1,5 @@
+wire:
+  shutdownTimeout: 10s
 logger:
   development: true
   format: text # text / json

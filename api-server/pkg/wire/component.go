@@ -6,23 +6,26 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/isutare412/goarch/api-server/pkg/config"
 	"github.com/isutare412/goarch/api-server/pkg/log"
 )
 
 type components struct {
-	ctrl *controllers
+	ctrl            *controllers
+	shutdownTimeout time.Duration
 }
 
-func NewComponents(cfg *config.Hub) (*components, error) {
+func NewComponents(cfg *config.Hub, shutdownTimeout time.Duration) (*components, error) {
 	var ctrl controllers
 	if err := ctrl.wire(cfg); err != nil {
 		return nil, fmt.Errorf("wiring controllers: %w", err)
 	}
 
 	return &components{
-		ctrl: &ctrl,
+		ctrl:            &ctrl,
+		shutdownTimeout: shutdownTimeout,
 	}, nil
 }
 
@@ -59,8 +62,8 @@ func (c *components) GracefulShutdown() {
 
 	shutdownables := c.collectShutdownables()
 
-	// TODO: Set context timeout.
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), c.shutdownTimeout)
+	defer cancel()
 
 	for _, s := range shutdownables {
 		if err := s.Shutdown(ctx); err != nil {

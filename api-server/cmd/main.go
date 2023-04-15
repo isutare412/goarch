@@ -24,7 +24,7 @@ func main() {
 	log.Init(cfgHub.ToLogConfig())
 	defer log.Sync()
 
-	components, err := wire.NewComponents(cfgHub)
+	components, err := wire.NewComponents(cfgHub, cfg.Wire.ShutdownTimeout)
 	if err != nil {
 		log.WithOperation("wireComponents").Fatalf("Failed to wire components: %v", err)
 	}
