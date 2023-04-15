@@ -1,0 +1,11 @@
+###
+GET {{baseUrl}}/api/v1/dev
+
+###
+POST {{baseUrl}}/api/v1/dev
+Content-Type: application/json
+
+{
+    "foo": "bar",
+    "age": 22
+}

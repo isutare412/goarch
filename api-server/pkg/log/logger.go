@@ -9,18 +9,10 @@ import (
 
 type Logger = *zap.SugaredLogger
 
-const (
-	keyType      = "type"
-	keyOperation = "operation"
-)
-
-const (
-	typeApp    = "app"
-	typeAccess = "access"
-)
-
 var (
-	globalLogger Logger = zap.NewNop().Sugar()
+	globalBaseLogger   Logger = zap.NewNop().Sugar()
+	globalAppLogger    Logger = zap.NewNop().Sugar()
+	globalAccessLogger Logger = zap.NewNop().Sugar()
 )
 
 func Init(cfg Config) {
@@ -50,9 +42,16 @@ func Init(cfg Config) {
 
 	if cfg.Development {
 		zcfg.Development = true
-		zcfg.EncoderConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+		zcfg.EncoderConfig.EncodeDuration = zapcore.StringDurationEncoder
+
+		if cfg.Format == FormatText {
+			zcfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		} else {
+			zcfg.EncoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
+		}
 	} else {
 		zcfg.Development = false
+		zcfg.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
 		zcfg.EncoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
 	}
 
@@ -64,26 +63,25 @@ func Init(cfg Config) {
 		panic(fmt.Sprintf("failed to build zap logger: %v", err))
 	}
 
-	globalLogger = logger.Sugar()
+	setGlobalLogger(logger.Sugar())
 }
 
 func A() Logger {
-	return globalLogger.With(zap.String(keyType, typeAccess))
+	return globalAccessLogger
 }
 
 func L() Logger {
-	return globalLogger.With(zap.String(keyType, typeApp))
+	return globalAppLogger
 }
 
 func WithOperation(op string) Logger {
-	return globalLogger.With(
-		zap.String(keyType, typeApp),
-		zap.String(keyOperation, op),
+	return globalAppLogger.With(
+		zap.String("operation", op),
 	)
 }
 
 func Sync() {
-	globalLogger.Sync()
+	globalBaseLogger.Sync()
 }
 
 func baseZapConfig() zap.Config {
@@ -91,4 +89,10 @@ func baseZapConfig() zap.Config {
 	cfg.Sampling = nil
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	return cfg
+}
+
+func setGlobalLogger(logger Logger) {
+	globalBaseLogger = logger
+	globalAppLogger = logger.With(zap.String("type", "app"))
+	globalAccessLogger = logger.With(zap.String("type", "access")).WithOptions(zap.WithCaller(false))
 }

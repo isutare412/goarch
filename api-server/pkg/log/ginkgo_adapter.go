@@ -15,9 +15,10 @@ func (gs ginkgoSyncer) Sync() error { return nil }
 func AdaptGinkgo() {
 	encCfg := zap.NewProductionConfig().EncoderConfig
 	encCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	encCfg.EncodeDuration = zapcore.StringDurationEncoder
 	encCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
 
 	zenc := zapcore.NewConsoleEncoder(encCfg)
 	zcore := zapcore.NewCore(zenc, ginkgoSyncer{ginkgo.GinkgoWriter}, zapcore.DebugLevel)
-	globalLogger = zap.New(zcore, zap.AddCaller()).Sugar()
+	setGlobalLogger(zap.New(zcore, zap.AddCaller()).Sugar())
 }
