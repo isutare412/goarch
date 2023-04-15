@@ -4,3 +4,6 @@ logger:
   level: debug # debug / info / warn / error / panic / fatal
   stackTrace: false
   caller: true
+http:
+  host: "0.0.0.0"
+  port: 18412
