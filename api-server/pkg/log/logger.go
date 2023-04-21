@@ -17,28 +17,8 @@ var (
 
 func Init(cfg Config) {
 	zcfg := baseZapConfig()
-
-	switch cfg.Format {
-	case FormatJSON:
-		zcfg.Encoding = "json"
-	case FormatText:
-		zcfg.Encoding = "console"
-	}
-
-	switch cfg.Level {
-	case LevelDebug:
-		zcfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	case LevelInfo:
-		zcfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
-	case LevelWarn:
-		zcfg.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
-	case LevelError:
-		zcfg.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
-	case LevelPanic:
-		zcfg.Level = zap.NewAtomicLevelAt(zap.PanicLevel)
-	case LevelFatal:
-		zcfg.Level = zap.NewAtomicLevelAt(zap.FatalLevel)
-	}
+	zcfg.Encoding = cfg.Format.ZapEncoding()
+	zcfg.Level = cfg.Level.ZapLevel()
 
 	if cfg.Development {
 		zcfg.Development = true

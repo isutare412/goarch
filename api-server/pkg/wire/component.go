@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/isutare412/goarch/api-server/pkg/config"
-	"github.com/isutare412/goarch/api-server/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/config"
+	"github.com/isutare412/goarch/http-base/pkg/log"
 )
 
 type components struct {

@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/isutare412/goarch/api-server/pkg/config"
+	"github.com/isutare412/goarch/http-base/pkg/config"
 )
 
 var _ = Describe("Loader", func() {

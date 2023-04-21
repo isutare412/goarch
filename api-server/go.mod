@@ -1,4 +1,4 @@
-module github.com/isutare412/goarch/api-server
+module github.com/isutare412/goarch/http-base
 
 go 1.20
 

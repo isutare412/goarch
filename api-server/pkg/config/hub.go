@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/isutare412/goarch/api-server/pkg/controller/http"
-	"github.com/isutare412/goarch/api-server/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/controller/http"
+	"github.com/isutare412/goarch/http-base/pkg/log"
 )
 
 type Hub struct {

@@ -1,8 +1,8 @@
 package wire
 
 import (
-	"github.com/isutare412/goarch/api-server/pkg/config"
-	"github.com/isutare412/goarch/api-server/pkg/controller/http"
+	"github.com/isutare412/goarch/http-base/pkg/config"
+	"github.com/isutare412/goarch/http-base/pkg/controller/http"
 )
 
 type controllers struct {

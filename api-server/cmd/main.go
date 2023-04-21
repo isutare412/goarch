@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 
-	"github.com/isutare412/goarch/api-server/pkg/config"
-	"github.com/isutare412/goarch/api-server/pkg/log"
-	"github.com/isutare412/goarch/api-server/pkg/wire"
+	"github.com/isutare412/goarch/http-base/pkg/config"
+	"github.com/isutare412/goarch/http-base/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/wire"
 )
 
 var configPath = flag.String("config", "config.yaml", "YAML config file path")

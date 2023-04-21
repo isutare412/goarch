@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 
-	"github.com/isutare412/goarch/api-server/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/log"
 )
 
 func init() {

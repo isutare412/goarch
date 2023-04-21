@@ -1,6 +1,10 @@
 package log
 
-import "fmt"
+import (
+	"fmt"
+
+	"go.uber.org/zap"
+)
 
 type Config struct {
 	Development bool
@@ -26,6 +30,19 @@ func (f Format) Validate() error {
 	}
 }
 
+func (f Format) ZapEncoding() string {
+	var zf string
+	switch f {
+	case FormatJSON:
+		zf = "json"
+	case FormatText:
+		fallthrough
+	default:
+		zf = "console"
+	}
+	return zf
+}
+
 type Level string
 
 const (
@@ -44,4 +61,25 @@ func (l Level) Validate() error {
 	default:
 		return fmt.Errorf("invalid log level '%s'", l)
 	}
+}
+
+func (l Level) ZapLevel() zap.AtomicLevel {
+	var zlevel zap.AtomicLevel
+	switch l {
+	case LevelDebug:
+		zlevel = zap.NewAtomicLevelAt(zap.DebugLevel)
+	case LevelInfo:
+		zlevel = zap.NewAtomicLevelAt(zap.InfoLevel)
+	case LevelWarn:
+		zlevel = zap.NewAtomicLevelAt(zap.WarnLevel)
+	case LevelError:
+		zlevel = zap.NewAtomicLevelAt(zap.ErrorLevel)
+	case LevelPanic:
+		zlevel = zap.NewAtomicLevelAt(zap.PanicLevel)
+	case LevelFatal:
+		zlevel = zap.NewAtomicLevelAt(zap.FatalLevel)
+	default:
+		zlevel = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
+	return zlevel
 }
