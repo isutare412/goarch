@@ -24,7 +24,10 @@ $(LOCALBIN):
 ## Tool Binaries
 GINKGO ?= $(LOCALBIN)/ginkgo
 
+## Tool Versions
+GINKGO_VERSION ?= v2.9.2
+
 .PHONY: ginkgo
 ginkgo: $(GINKGO) ## Install ginkgo locally if necessary.
 $(GINKGO): $(LOCALBIN)
-	@test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo@v2.9.2
+	@test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo@$(GINKGO_VERSION)
