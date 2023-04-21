@@ -33,8 +33,8 @@ func readFile(path string) error {
 }
 
 func readEnv() {
-	// API_FOO_BAR=baz -> cfg.Foo.Bar = "baz"
-	viper.SetEnvPrefix("api")
+	// APP_FOO_BAR=baz -> cfg.Foo.Bar = "baz"
+	viper.SetEnvPrefix("app")
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 }

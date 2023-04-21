@@ -12,7 +12,7 @@ import (
 
 var _ = Describe("Loader", func() {
 	It("loads config overwritten by environment variables", func() {
-		os.Setenv("API_LOGGER_FORMAT", "TEST")
+		os.Setenv("APP_LOGGER_FORMAT", "TEST")
 
 		cfg, err := config.LoadValidated(path.Join("..", "..", "config.yaml"))
 		Expect(err).To(HaveOccurred())
