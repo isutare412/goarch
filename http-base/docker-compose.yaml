@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.44
+    ports:
+      - 5778:5778       # Configs
+      - 16686:16686     # Frontend
+      - 5775:5775/udp   # (Agent) Zipkin thrift compact
+      - 6831:6831/udp   # (Agent) Jaeger thrift compact
+      - 6832:6832/udp   # (Agent) Jaeger thrift binary
+      - 14268:14268     # (Collector) Jaeger thrift
+      - 9411:9411       # (Collector) Zipkin
+    restart: unless-stopped
