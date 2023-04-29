@@ -8,10 +8,21 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/isutare412/goarch/http-base/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/tracing"
 )
 
-func init() {
-	middleware.DefaultLogger = requestLogger
+func startTrace(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		ctx := tracing.CtxFromHTTPHeader(r.Context(), r.Header)
+		ctx, span := tracing.AutoSpan(ctx)
+		defer span.End()
+
+		traceID, _ := tracing.ExtractIDs(span)
+		ctx = injectTraceID(ctx, traceID)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+	return http.HandlerFunc(fn)
 }
 
 func requestLogger(next http.Handler) http.Handler {
@@ -31,12 +42,18 @@ func requestLogger(next http.Handler) http.Handler {
 			statusCode = sc
 		}
 
+		var traceID string
+		if id, ok := extractTraceID(r.Context()); ok {
+			traceID = id.String()
+		}
+
 		log.A().
 			With(
 				zap.String("method", r.Method),
 				zap.String("url", r.URL.String()),
 				zap.String("addr", r.RemoteAddr),
 				zap.String("proto", r.Proto),
+				zap.String("traceID", traceID),
 				zap.String("contentType", contentType),
 				zap.Int64("contentLength", r.ContentLength),
 				zap.String("userAgent", r.UserAgent()),

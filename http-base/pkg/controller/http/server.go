@@ -21,9 +21,7 @@ func NewServer(cfg Config) *Server {
 	devCtrl := devController{}
 
 	r := chi.NewRouter()
-	r.Use(middleware.RealIP)
-	r.Use(requestLogger)
-	r.Use(recoverPanic)
+	r.Use(middleware.RealIP, startTrace, requestLogger, recoverPanic)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Mount("/dev", devCtrl.router())
