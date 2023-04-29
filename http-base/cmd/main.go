@@ -5,6 +5,7 @@ import (
 
 	"github.com/isutare412/goarch/http-base/pkg/config"
 	"github.com/isutare412/goarch/http-base/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/tracing"
 	"github.com/isutare412/goarch/http-base/pkg/wire"
 )
 
@@ -24,9 +25,12 @@ func main() {
 	log.Init(cfgHub.ToLogConfig())
 	defer log.Sync()
 
+	tracing.Init(cfgHub.ToTracingConfig())
+	defer tracing.Shutdown()
+
 	components, err := wire.NewComponents(cfgHub, cfg.Wire.ShutdownTimeout)
 	if err != nil {
-		log.WithOperation("wireComponents").Fatalf("Failed to wire components: %v", err)
+		log.WithOperation("wireComponents").Panicf("Failed to wire components: %v", err)
 	}
 
 	components.RunAndWait()
