@@ -1,3 +1,6 @@
+app: http-base
+environment: local
+version: development
 wire:
   shutdownTimeout: 10s
 logger:
@@ -6,6 +9,10 @@ logger:
   level: debug # debug / info / warn / error / panic / fatal
   stackTrace: false
   caller: true
+tracing:
+  enabled: false
+  jaeger:
+    collectorEndpoint: http://localhost:14268/api/traces
 http:
   host: "0.0.0.0"
   port: 18412

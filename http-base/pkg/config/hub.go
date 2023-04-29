@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/isutare412/goarch/http-base/pkg/controller/http"
 	"github.com/isutare412/goarch/http-base/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/tracing"
 )
 
 type Hub struct {
@@ -20,6 +21,15 @@ func (h *Hub) ToLogConfig() log.Config {
 		Level:       h.cfg.Logger.Level,
 		StackTrace:  h.cfg.Logger.StackTrace,
 		Caller:      h.cfg.Logger.Caller,
+	}
+}
+
+func (h *Hub) ToTracingConfig() tracing.Config {
+	return tracing.Config{
+		Enabled:                 h.cfg.Tracing.Enabled,
+		ServiceName:             h.cfg.App,
+		Environment:             h.cfg.Environment,
+		JaegerCollectorEndpoint: h.cfg.Tracing.Jaeger.CollectorEndpoint,
 	}
 }
 
