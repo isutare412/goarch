@@ -43,24 +43,23 @@ func requestLogger(next http.Handler) http.Handler {
 		}
 
 		var traceID string
-		if id, ok := extractTraceID(r.Context()); ok {
+		if id, ok := extractTraceID(r.Context()); ok && id.IsValid() {
 			traceID = id.String()
 		}
 
-		log.A().
-			With(
-				zap.String("method", r.Method),
-				zap.String("url", r.URL.String()),
-				zap.String("addr", r.RemoteAddr),
-				zap.String("proto", r.Proto),
-				zap.String("traceID", traceID),
-				zap.String("contentType", contentType),
-				zap.Int64("contentLength", r.ContentLength),
-				zap.String("userAgent", r.UserAgent()),
-				zap.Int("status", statusCode),
-				zap.Int("bodyBytes", ww.BytesWritten()),
-				zap.Duration("elapsed", elapsedTime),
-			).Info()
+		log.A().With(
+			zap.String("method", r.Method),
+			zap.String("url", r.URL.String()),
+			zap.String("addr", r.RemoteAddr),
+			zap.String("proto", r.Proto),
+			zap.String("traceID", traceID),
+			zap.String("contentType", contentType),
+			zap.Int64("contentLength", r.ContentLength),
+			zap.String("userAgent", r.UserAgent()),
+			zap.Int("status", statusCode),
+			zap.Int("bodyBytes", ww.BytesWritten()),
+			zap.Duration("elapsed", elapsedTime),
+		).Info()
 	}
 
 	return http.HandlerFunc(fn)
