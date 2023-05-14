@@ -1,12 +1,13 @@
 package http
 
 import (
-	"io"
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/isutare412/goarch/http-base/pkg/controller/pkgerr"
 	"github.com/isutare412/goarch/http-base/pkg/log"
 	"github.com/isutare412/goarch/http-base/pkg/tracing"
 )
@@ -14,13 +15,11 @@ import (
 type devController struct{}
 
 func (ctrl *devController) router() chi.Router {
-	jsonContent := middleware.AllowContentType("application/json")
+	jsonContent := allowContentType("application/json")
 
 	r := chi.NewRouter()
 	r.Get("/", ctrl.handleGet)
-	r.With(jsonContent).Group(func(r chi.Router) {
-		r.Post("/", ctrl.handlePost)
-	})
+	r.Post("/", jsonContent(ctrl.handlePost))
 
 	return r
 }
@@ -37,13 +36,26 @@ func (ctrl *devController) handlePost(w http.ResponseWriter, r *http.Request) {
 	_, span := tracing.AutoSpan(r.Context())
 	defer span.End()
 
-	bodyBytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.WithOperation("readHTTPBody").Errorf("Failed to read body of HTTP request: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
+	var req handlePostRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		tracing.AutoError(span, err)
+		responseError(w, r, fmt.Errorf("decoding http request body: %w", err))
 		return
 	}
 
-	log.L().Debugf("Post dev request body: %s", string(bodyBytes))
-	responseBytes(w, r, bodyBytes)
+	log.L().Debugf("handlePostRequest: %+v", req)
+
+	if req.Name == "foo" {
+		err := fmt.Errorf("foo user leads to 500 error")
+		tracing.AutoError(span, err)
+		responseError(w, r, err)
+		return
+	} else if req.Name == "bar" {
+		err := pkgerr.InvalidRequest{Reason: "bar user leads to 400 error"}
+		tracing.AutoError(span, err)
+		responseError(w, r, err)
+		return
+	}
+
+	responseText(w, r, "Post request handled!")
 }

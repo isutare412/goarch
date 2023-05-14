@@ -20,7 +20,8 @@ func startTrace(next http.Handler) http.Handler {
 		traceID, _ := tracing.ExtractIDs(span)
 		ctx = injectTraceID(ctx, traceID)
 
-		next.ServeHTTP(w, r.WithContext(ctx))
+		*r = *r.WithContext(ctx)
+		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)
 }
@@ -32,34 +33,36 @@ func requestLogger(next http.Handler) http.Handler {
 		next.ServeHTTP(ww, r)
 		elapsedTime := time.Since(beforeServing)
 
-		var contentType string
-		if ct := r.Header.Get("Content-Type"); ct != "" {
-			contentType = ct
-		}
-
 		var statusCode = http.StatusOK
 		if sc := ww.Status(); sc != 0 {
 			statusCode = sc
 		}
 
-		var traceID string
-		if id, ok := extractTraceID(r.Context()); ok && id.IsValid() {
-			traceID = id.String()
-		}
-
-		log.A().With(
+		accessLog := log.A().With(
 			zap.String("method", r.Method),
 			zap.String("url", r.URL.String()),
 			zap.String("addr", r.RemoteAddr),
 			zap.String("proto", r.Proto),
-			zap.String("traceID", traceID),
-			zap.String("contentType", contentType),
 			zap.Int64("contentLength", r.ContentLength),
 			zap.String("userAgent", r.UserAgent()),
 			zap.Int("status", statusCode),
 			zap.Int("bodyBytes", ww.BytesWritten()),
 			zap.Duration("elapsed", elapsedTime),
-		).Info()
+		)
+
+		if ct := r.Header.Get("Content-Type"); ct != "" {
+			accessLog = accessLog.With(zap.String("contentType", ct))
+		}
+
+		if id, ok := extractTraceID(r.Context()); ok && id.IsValid() {
+			accessLog = accessLog.With(zap.String("traceID", id.String()))
+		}
+
+		if errResp, ok := extractErrorResponse(r.Context()); ok {
+			accessLog = accessLog.With(zap.String("error", errResp.Message))
+		}
+
+		accessLog.Info()
 	}
 
 	return http.HandlerFunc(fn)
@@ -78,4 +81,15 @@ func recoverPanic(next http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(fn)
+}
+
+func allowContentType(contentTypes ...string) func(http.HandlerFunc) http.HandlerFunc {
+	mw := func(next http.HandlerFunc) http.HandlerFunc {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			withContent := middleware.AllowContentType(contentTypes...)
+			withContent(next).ServeHTTP(w, r)
+		}
+		return fn
+	}
+	return mw
 }

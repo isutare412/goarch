@@ -6,6 +6,7 @@ POST {{baseUrl}}/api/v1/dev
 Content-Type: application/json
 
 {
-    "foo": "bar",
+    "name": "redshore",
+    "address": "Pangyo",
     "age": 22
 }
