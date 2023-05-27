@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/isutare412/goarch/http-base/pkg/controller/pkgerr"
 	"github.com/isutare412/goarch/http-base/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/pkgerr"
 	"github.com/isutare412/goarch/http-base/pkg/tracing"
 )
 
