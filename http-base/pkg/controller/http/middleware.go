@@ -11,6 +11,14 @@ import (
 	"github.com/isutare412/goarch/http-base/pkg/tracing"
 )
 
+func wrapResponseWriter(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+		next.ServeHTTP(ww, r)
+	}
+	return http.HandlerFunc(fn)
+}
+
 func startTrace(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		ctx := tracing.CtxFromHTTPHeader(r.Context(), r.Header)
@@ -28,10 +36,10 @@ func startTrace(next http.Handler) http.Handler {
 
 func requestLogger(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 		beforeServing := time.Now()
-		next.ServeHTTP(ww, r)
+		next.ServeHTTP(w, r)
 		elapsedTime := time.Since(beforeServing)
+		ww := w.(middleware.WrapResponseWriter)
 
 		var statusCode = http.StatusOK
 		if sc := ww.Status(); sc != 0 {
