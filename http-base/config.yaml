@@ -13,6 +13,9 @@ tracing:
   enabled: false
   jaeger:
     collectorEndpoint: http://localhost:14268/api/traces
+metric:
+  host: "0.0.0.0"
+  port: 18422
 http:
   host: "0.0.0.0"
   port: 18412

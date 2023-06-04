@@ -1,4 +1,7 @@
 ###
+GET {{metricUrl}}/metrics
+
+###
 GET {{baseUrl}}/api/v1/dev
 
 ###

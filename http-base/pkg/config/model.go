@@ -12,6 +12,7 @@ type Config struct {
 	Wire        WireConfig    `mapstructure:"wire"`
 	Logger      LoggerConfig  `mapstructure:"logger"`
 	Tracing     TracingConfig `mapstructure:"tracing"`
+	Metric      MetricConfig  `mapstructure:"metric"`
 	HTTP        HTTPConfig    `mapstructure:"http"`
 }
 
@@ -33,6 +34,9 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Tracing.Validate(); err != nil {
 		return fmt.Errorf("validating tracing config: %w", err)
+	}
+	if err := c.Metric.Validate(); err != nil {
+		return fmt.Errorf("validating metric config: %w", err)
 	}
 	if err := c.HTTP.Validate(); err != nil {
 		return fmt.Errorf("validating http config: %w", err)

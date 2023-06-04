@@ -75,11 +75,13 @@ func (c *components) GracefulShutdown() {
 func (c *components) collectRunnables() []namedRunnable {
 	var runs []namedRunnable
 	runs = append(runs, asRunnable("httpServer", c.ctrl.httpServer))
+	runs = append(runs, asRunnable("metricServer", c.ctrl.metricServer))
 	return runs
 }
 
 func (c *components) collectShutdownables() []namedShutdownable {
 	var shuts []namedShutdownable
+	shuts = append(shuts, asShutdownable("metricServer", c.ctrl.metricServer))
 	shuts = append(shuts, asShutdownable("httpServer", c.ctrl.httpServer))
 	return shuts
 }

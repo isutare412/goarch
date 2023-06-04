@@ -35,7 +35,9 @@ func (h *Hub) ToTracingConfig() tracing.Config {
 
 func (h *Hub) ToHTTPServerConfig() http.Config {
 	return http.Config{
-		Host: h.cfg.HTTP.Host,
-		Port: h.cfg.HTTP.Port,
+		Host:       h.cfg.HTTP.Host,
+		Port:       h.cfg.HTTP.Port,
+		MetricHost: h.cfg.Metric.Host,
+		MetricPort: h.cfg.Metric.Port,
 	}
 }
