@@ -56,12 +56,12 @@ func CtxFromMap(ctx context.Context, m map[string]string) context.Context {
 	return otel.GetTextMapPropagator().Extract(ctx, propagation.MapCarrier(m))
 }
 
-func SerializeIntoMap(ctx context.Context) map[string]string {
-	// Capacity of map is 5 because we are using B3MultipleHeader for
-	// propagation.
-	m := make(map[string]string, 5)
+func InjectToMap(ctx context.Context, m map[string]string) {
 	otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(m))
-	return m
+}
+
+func InjectToHTTPHeader(ctx context.Context, h http.Header) {
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(h))
 }
 
 func funcName(skip int) string {

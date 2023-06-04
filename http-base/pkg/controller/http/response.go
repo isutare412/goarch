@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	headerKeyTraceID = "X-B3-Traceid"
+	headerKeyTraceID = "x-trace-id"
 )
 
 type statusCodeError interface {
