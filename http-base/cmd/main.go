@@ -5,6 +5,7 @@ import (
 
 	"github.com/isutare412/goarch/http-base/pkg/config"
 	"github.com/isutare412/goarch/http-base/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/metric"
 	"github.com/isutare412/goarch/http-base/pkg/tracing"
 	"github.com/isutare412/goarch/http-base/pkg/wire"
 )
@@ -27,6 +28,8 @@ func main() {
 
 	tracing.Init(cfgHub.ToTracingConfig())
 	defer tracing.Shutdown()
+
+	metric.Init()
 
 	components, err := wire.NewComponents(cfgHub, cfg.Wire.ShutdownTimeout)
 	if err != nil {
