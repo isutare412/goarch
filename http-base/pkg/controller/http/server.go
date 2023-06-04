@@ -26,6 +26,7 @@ func NewServer(cfg Config) *Server {
 		wrapResponseWriter,
 		startTrace,
 		requestLogger,
+		observeMetrics,
 		recoverPanic)
 
 	r.Route("/api/v1", func(r chi.Router) {

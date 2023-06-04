@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/isutare412/goarch/http-base/pkg/log"
+	"github.com/isutare412/goarch/http-base/pkg/metric"
 	"github.com/isutare412/goarch/http-base/pkg/tracing"
 )
 
@@ -73,6 +74,19 @@ func requestLogger(next http.Handler) http.Handler {
 		accessLog.Info()
 	}
 
+	return http.HandlerFunc(fn)
+}
+
+func observeMetrics(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		metric.ObserveHTTPRequestEvent(r.Method, r.URL.Path)
+		start := time.Now()
+
+		next.ServeHTTP(w, r)
+		ww := w.(middleware.WrapResponseWriter)
+
+		metric.ObserveHTTPResponseEvent(r.Method, r.URL.Path, ww.Status(), start)
+	}
 	return http.HandlerFunc(fn)
 }
 
