@@ -66,6 +66,7 @@ func Sync() {
 
 func baseZapConfig() zap.Config {
 	cfg := zap.NewProductionConfig()
+	cfg.OutputPaths = []string{"stdout"}
 	cfg.Sampling = nil
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	return cfg
