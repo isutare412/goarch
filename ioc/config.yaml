@@ -1,0 +1,14 @@
+app: ioc-app
+environment: local
+version: development
+lifecycle:
+  startTimeout: 30s
+  stopTimeout: 30s
+log:
+  development: true
+  format: text # text / json
+  level: debug # debug / info / warn / error / panic / fatal
+  stackTrace: false
+  caller: false
+http:
+  port: 38010
